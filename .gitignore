@@ -1,0 +1,10 @@
+# Ignore Python cache files and compiled bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+/.ruff_cache
+
+# Ignore dubug image
+/debug_output
+board_debug_*.png
