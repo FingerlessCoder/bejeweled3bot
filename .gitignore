@@ -8,3 +8,10 @@ __pycache__/
 # Ignore dubug image
 /debug_output
 board_debug_*.png
+
+# Runtime artifacts
+bot_moves.log
+color_reference.json
+
+# Special gem samples captured during runs
+special_templates/sample_*.png

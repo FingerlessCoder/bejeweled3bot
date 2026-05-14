@@ -4,12 +4,12 @@
   "profiles": {
     "classic": {
       "normalized_board_region": {
-        "left": 0.325,
+        "left": 0.32625,
         "top": 0.06333333333333334,
         "right": 0.96375,
-        "bottom": 0.9116666666666666
+        "bottom": 0.9133333333333333
       },
-      "saved_at": "2026-05-15 01:53:20"
+      "saved_at": "2026-05-15 02:51:49"
     },
     "lightning": {
       "normalized_board_region": {

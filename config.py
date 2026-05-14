@@ -94,7 +94,7 @@ CASCADE_DEPTH_BONUS = 50  # Points per cascade level
 IMMEDIATE_MATCH_WEIGHT = 10
 
 # Debug settings
-DEBUG_MODE = False
+DEBUG_MODE = True
 SAVE_DEBUG_SCREENSHOTS = True
 MAX_DEBUG_SCREENSHOTS = 64
 DEBUG_OUTPUT_DIR = "debug_output"

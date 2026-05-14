@@ -174,41 +174,35 @@ class GameLogic:
         
         return board
     
-    def evaluate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
-        """
-        Evaluate the quality of a move by simulating it and the cascade.
-        Handles both normal swaps and hypercube board-wipe moves.
-        Returns total score.
+    def simulate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[int, np.ndarray]:
+        """Simulate a move and return (total_score, board_after_cascades).
+        Unlike evaluate_move, this also returns the resulting board for lookahead.
         """
         if not self._is_valid_move(move):
-            return 0
+            return 0, self.board.copy()
 
         (r1, c1), (r2, c2) = move
         g1 = self.board[r1, c1]
         g2 = self.board[r2, c2]
 
-        # Hypercube move: swap clears all gems of the target color
+        # Hypercube move
         if self._is_hypercube(g1) or self._is_hypercube(g2):
             target_type = g2 if self._is_hypercube(g1) else g1
             if target_type < 0 or target_type >= NORMAL_GEM_COUNT:
-                return 0  # hypercube on hypercube or empty — skip
+                return 0, self.board.copy()
 
-            # Remove hypercube, the swapped gem, and ALL gems of target_type
             test_board = self.board.copy()
             test_board[r1, c1] = -1
             test_board[r2, c2] = -1
             count_cleared = int(np.sum(test_board == target_type))
             test_board[test_board == target_type] = -1
-            count_cleared += 1  # the swapped gem itself
-
+            count_cleared += 1
             test_board = self._apply_gravity(test_board)
             final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
-
-            # Board-wipe bonus: each gem cleared = high value
             board_wipe_score = count_cleared * IMMEDIATE_MATCH_WEIGHT * 10
-            return board_wipe_score + cascade_score + (r1 + r2) * 2
+            return board_wipe_score + cascade_score + (r1 + r2) * 2, final_board
 
-        # Normal move: swap and simulate cascades
+        # Normal move
         test_board = self.board.copy()
         test_board[r1, c1], test_board[r2, c2] = test_board[r2, c2], test_board[r1, c1]
 
@@ -220,9 +214,45 @@ class GameLogic:
 
         final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
         row_bonus = (r1 + r2) * 2
+        return immediate_score + cascade_score + row_bonus, final_board
 
-        return immediate_score + cascade_score + row_bonus
+    def evaluate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
+        """Evaluate the quality of a move. Returns total score."""
+        score, _ = self.simulate_move(move)
+        return score
     
+    def evaluate_board_potential(self, board: np.ndarray = None) -> int:
+        """Score a board position for follow-up potential.
+
+        Rewards boards with more valid moves and near-matches
+        (adjacent same-colour pairs that aren't yet a match-3).
+        Used by 2-ply lookahead to prefer setups over dead boards.
+        """
+        if board is None:
+            board = self.board
+
+        old_board = self.board
+        self.board = board
+        valid_moves = self.find_valid_moves()
+        self.board = old_board
+
+        # Base: more valid moves = better setup
+        move_potential = len(valid_moves) * IMMEDIATE_MATCH_WEIGHT * 2
+
+        # Bonus: count near-matches (adjacent same-type pairs)
+        near_matches = 0
+        for r in range(BOARD_HEIGHT):
+            for c in range(BOARD_WIDTH):
+                gid = board[r, c]
+                if gid < 0 or gid >= NORMAL_GEM_COUNT:
+                    continue
+                if c + 1 < BOARD_WIDTH and board[r, c + 1] == gid:
+                    near_matches += 1
+                if r + 1 < BOARD_HEIGHT and board[r + 1, c] == gid:
+                    near_matches += 1
+
+        return move_potential + near_matches * IMMEDIATE_MATCH_WEIGHT
+
     def get_gem_type_name(self, gem_id: int) -> str:
         """Convert gem ID back to name."""
         id_to_name = {v: k for k, v in {

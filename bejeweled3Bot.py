@@ -461,7 +461,7 @@ class BejewelBot:
 
 def _select_game_mode() -> str:
     """Prompt user to pick game mode and update config."""
-    gm = input("Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm): ").strip()
+    gm = input("Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm/Butterfly): ").strip()
     selected = "lightning" if gm == "2" else "classic"
     import config as cfg
 
