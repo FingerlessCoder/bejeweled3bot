@@ -20,6 +20,7 @@ pyautogui.PAUSE = 0.0
 
 HOTKEY_ID_TOGGLE_PAUSE = 1
 HOTKEY_ID_QUIT = 2
+HOTKEY_ID_STEP = 3
 WM_HOTKEY = 0x0312
 WM_QUIT = 0x0012
 VK_SPACE = 0x20
@@ -353,36 +354,60 @@ class BejewelBot:
 
         print("=" * 60)
 
-    def interactive_mode(self):
+    def step_mode(self):
         """
-        Interactive mode: press space to make a move, 'q' to quit.
-        Useful for testing and debugging.
+        Step mode: SPACE executes one move, Q quits.
+        Same hotkey system as auto mode, but moves one at a time.
         """
-        print("[BOT] Entering interactive mode")
-        print("[BOT] Controls:")
-        print("  SPACE - Make a move")
-        print("  V - Show board visualization")
-        print("  Q - Quit")
+        print("[BOT] Entering step mode")
+        print("[BOT] Controls: SPACE = one move, Q = quit")
 
         self.game_active = True
+        self.paused = False
+        self.stop_requested = False
+        self._step_requested = False
+
+        def _step_listener():
+            user32 = ctypes.windll.user32
+            kernel32 = ctypes.windll.kernel32
+            tid = kernel32.GetCurrentThreadId()
+
+            if not user32.RegisterHotKey(None, HOTKEY_ID_STEP, 0, VK_SPACE):
+                return
+            if not user32.RegisterHotKey(None, HOTKEY_ID_QUIT, 0, VK_Q):
+                user32.UnregisterHotKey(None, HOTKEY_ID_STEP)
+                return
+
+            msg = wintypes.MSG()
+            try:
+                while self.game_active and not self.stop_requested:
+                    r = user32.GetMessageW(ctypes.byref(msg), None, 0, 0)
+                    if r in (0, -1):
+                        break
+                    if msg.message == WM_HOTKEY:
+                        if msg.wParam == HOTKEY_ID_STEP:
+                            self._step_requested = True
+                        elif msg.wParam == HOTKEY_ID_QUIT:
+                            self.stop_requested = True
+                            self.game_active = False
+                            break
+                    user32.TranslateMessage(ctypes.byref(msg))
+                    user32.DispatchMessageW(ctypes.byref(msg))
+            finally:
+                user32.UnregisterHotKey(None, HOTKEY_ID_STEP)
+                user32.UnregisterHotKey(None, HOTKEY_ID_QUIT)
+
+        thread = threading.Thread(target=_step_listener, daemon=True)
+        thread.start()
 
         try:
-            while self.game_active:
-                cmd = input("\n> ").strip().lower()
-
-                if cmd == "q":
-                    self.game_active = False
-                    break
-                elif cmd == " ":
+            while self.game_active and not self.stop_requested:
+                if self._step_requested:
+                    self._step_requested = False
                     self._game_iteration()
-                elif cmd == "v":
-                    board = self.detector.get_board_state()
-                    if board is not None:
-                        BoardVisualizer.print_board(board)
-                else:
-                    print("Unknown command")
-
+                time.sleep(0.05)
         finally:
+            self._stop_hotkey_listener()
             self._end_session()
 
 
@@ -403,7 +428,7 @@ def main():
     print("=" * 60)
 
     mode = (
-        input("Select mode (1=Auto, 2=Interactive, 3=Test, 4=Calibrate board): ")
+        input("Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board): ")
         .strip()
         .lower()
     )
@@ -419,7 +444,7 @@ def main():
         return
 
     # Everything else: set game mode then create bot
-    if mode in ("1", "auto", "2", "interactive", "3", "test"):
+    if mode in ("1", "auto", "2", "step", "3", "test"):
         _select_game_mode()
 
     bot = BejewelBot()
@@ -429,8 +454,8 @@ def main():
         duration = int(duration) if duration.isdigit() else 0
         bot.start(duration)
 
-    elif mode in ("2", "interactive"):
-        bot.interactive_mode()
+    elif mode in ("2", "step"):
+        bot.step_mode()
 
     elif mode in ("3", "test"):
         print("[TEST] Testing vision system...")

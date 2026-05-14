@@ -9,13 +9,13 @@ BOARD_HEIGHT = 8
 # Range: ((r_min, g_min, b_min), (r_max, g_max, b_max))
 # These ranges are BROAD to work with various monitor/display settings
 GEM_COLORS = {
-    'red': ((120, 0, 0), (255, 150, 150)),            # Red gems (any shade)
-    'orange': ((150, 80, 0), (255, 200, 100)),        # Orange gems
-    'yellow': ((150, 120, 0), (255, 255, 100)),       # Yellow/gold gems
-    'green': ((0, 150, 0), (150, 255, 150)),          # Green/lime gems
-    'blue': ((0, 100, 150), (150, 255, 255)),         # Blue/cyan gems
-    'purple': ((80, 0, 120), (255, 150, 255)),        # Purple/magenta gems
-    'white': ((180, 180, 180), (255, 255, 255)),      # White/bright gems
+    "red": ((120, 0, 0), (255, 150, 150)),  # Red gems (any shade)
+    "orange": ((150, 80, 0), (255, 200, 100)),  # Orange gems
+    "yellow": ((150, 120, 0), (255, 255, 100)),  # Yellow/gold gems
+    "green": ((0, 150, 0), (150, 255, 150)),  # Green/lime gems
+    "blue": ((0, 100, 150), (150, 255, 255)),  # Blue/cyan gems
+    "purple": ((80, 0, 120), (255, 150, 255)),  # Purple/magenta gems
+    "white": ((180, 180, 180), (255, 255, 255)),  # White/bright gems
 }
 
 # ===== RESOLUTION CONFIGURATION =====
@@ -66,8 +66,6 @@ RESOLUTION_CONFIGS = {
     },
 }
 
-# Automatically detect board if resolution not in above list
-AUTO_DETECT_BOARD = GAME_RESOLUTION not in RESOLUTION_CONFIGS and GAME_RESOLUTION != "native"
 BOARD_DETECTION_PADDING = 30
 
 # Saved manual calibration for resized windows.
@@ -76,10 +74,7 @@ BOARD_DETECTION_PADDING = 30
 CALIBRATION_FILE = "board_calibration.json"
 
 # Timing settings (milliseconds)
-SCREENSHOT_DELAY = 100
 MOVE_DELAY = 200  # Delay after executing a move
-MIN_MOVE_INTERVAL = 200  # Minimum time between moves
-SCREENSHOT_TIMEOUT = 5000  # Max time to wait for screenshot
 
 # Match detection
 MIN_MATCH_LENGTH = 3
@@ -93,7 +88,6 @@ CASCADE_DEPTH_BONUS = 50  # Points per cascade level
 
 # Move scoring weights
 IMMEDIATE_MATCH_WEIGHT = 10
-CASCADE_BONUS_WEIGHT = 1
 
 # Debug settings
 DEBUG_MODE = True
