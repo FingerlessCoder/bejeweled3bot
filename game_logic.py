@@ -7,7 +7,8 @@ import numpy as np
 from typing import List, Tuple, Set
 from config import (
     BOARD_WIDTH, BOARD_HEIGHT, MIN_MATCH_LENGTH,
-    MAX_CASCADE_DEPTH, CASCADE_DEPTH_BONUS, IMMEDIATE_MATCH_WEIGHT
+    MAX_CASCADE_DEPTH, CASCADE_DEPTH_BONUS, IMMEDIATE_MATCH_WEIGHT,
+    NORMAL_GEM_COUNT, HYPERCUBE_GEM_ID
 )
 
 
@@ -52,14 +53,24 @@ class GameLogic:
         
         return valid_moves
     
+    def _is_hypercube(self, gem_id: int) -> bool:
+        return gem_id == HYPERCUBE_GEM_ID
+
     def _is_valid_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> bool:
-        """Check if a move creates at least one match."""
+        """Check if a move creates at least one match (or involves a hypercube)."""
         (r1, c1), (r2, c2) = move
-        
+
+        # Hypercube swaps are always valid
+        if self.board is not None:
+            g1 = self.board[r1, c1] if r1 < self.board.shape[0] and c1 < self.board.shape[1] else -1
+            g2 = self.board[r2, c2] if r2 < self.board.shape[0] and c2 < self.board.shape[1] else -1
+            if self._is_hypercube(g1) or self._is_hypercube(g2):
+                return True
+
         # Make a copy and perform the swap
         test_board = self.board.copy()
         test_board[r1, c1], test_board[r2, c2] = test_board[r2, c2], test_board[r1, c1]
-        
+
         # Check if any matches are found
         matches = self._find_all_matches(test_board)
         return len(matches) > 0
@@ -166,31 +177,48 @@ class GameLogic:
     def evaluate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
         """
         Evaluate the quality of a move by simulating it and the cascade.
+        Handles both normal swaps and hypercube board-wipe moves.
         Returns total score.
         """
         if not self._is_valid_move(move):
             return 0
-        
-        # Perform the move
+
         (r1, c1), (r2, c2) = move
+        g1 = self.board[r1, c1]
+        g2 = self.board[r2, c2]
+
+        # Hypercube move: swap clears all gems of the target color
+        if self._is_hypercube(g1) or self._is_hypercube(g2):
+            target_type = g2 if self._is_hypercube(g1) else g1
+            if target_type < 0 or target_type >= NORMAL_GEM_COUNT:
+                return 0  # hypercube on hypercube or empty — skip
+
+            # Remove hypercube, the swapped gem, and ALL gems of target_type
+            test_board = self.board.copy()
+            test_board[r1, c1] = -1
+            test_board[r2, c2] = -1
+            count_cleared = int(np.sum(test_board == target_type))
+            test_board[test_board == target_type] = -1
+            count_cleared += 1  # the swapped gem itself
+
+            test_board = self._apply_gravity(test_board)
+            final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
+
+            # Board-wipe bonus: each gem cleared = high value
+            board_wipe_score = count_cleared * IMMEDIATE_MATCH_WEIGHT * 10
+            return board_wipe_score + cascade_score + (r1 + r2) * 2
+
+        # Normal move: swap and simulate cascades
         test_board = self.board.copy()
         test_board[r1, c1], test_board[r2, c2] = test_board[r2, c2], test_board[r1, c1]
-        
-        # Find immediate matches
+
         matches = self._find_all_matches(test_board)
         immediate_score = len(matches) * IMMEDIATE_MATCH_WEIGHT
-        
-        # Remove matched gems
+
         for row, col in matches:
             test_board[row, col] = -1
-        
-        # Simulate cascade
-        final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
 
-        # ADDED: Bottom-up priority bonus
-        # The lower the gems are on the board (higher row index), the better
-        # the cascade potential. Give a small bonus proportional to the
-        # involved rows to prefer bottom-up moves.
+        final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
         row_bonus = (r1 + r2) * 2
 
         return immediate_score + cascade_score + row_bonus

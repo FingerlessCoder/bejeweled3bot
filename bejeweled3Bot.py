@@ -11,7 +11,7 @@ import threading
 from vision import BoardDetector
 from ai_player import AIPlayer
 from debug import BotLogger, BoardVisualizer
-from config import MOVE_DELAY, DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT
+from config import MOVE_DELAY, DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, HYPERCUBE_GEM_ID
 from config import MIN_CELL_CONFIDENCE
 
 # ADDED: Remove default pyautogui pause to speed up hardware execution
@@ -167,6 +167,52 @@ class BejewelBot:
             self._stop_hotkey_listener()
             self._end_session()
 
+    def _wait_for_board_stable(self, max_wait: float = 12.0) -> bool:
+        """
+        Poll until the board region pixels stabilise (cascades done).
+        Uses a fast screenshot-only diff instead of the full vision pipeline.
+        Returns True if stable, False if timed out.
+        """
+        import numpy as np
+        from PIL import ImageGrab
+        import cv2
+
+        stable_count = 0
+        required_stable = 2
+        prev_region = None
+        deadline = time.time() + max_wait
+
+        while time.time() < deadline:
+            full = np.array(ImageGrab.grab())
+            bgr = cv2.cvtColor(full, cv2.COLOR_RGB2BGR)
+
+            region = self.detector.board_region
+            if region is None:
+                time.sleep(0.08)
+                continue
+
+            rx, ry, rw, rh = region
+            if rw <= 0 or rh <= 0:
+                time.sleep(0.08)
+                continue
+
+            crop = bgr[ry:ry + int(rh), rx:rx + int(rw)]
+
+            if prev_region is not None:
+                diff = np.mean(np.abs(crop.astype(np.int16) - prev_region.astype(np.int16)))
+                if diff < 5.0:
+                    stable_count += 1
+                    if stable_count >= required_stable:
+                        return True
+                else:
+                    stable_count = 0
+
+            prev_region = crop
+            time.sleep(0.08)
+
+        print("[BOT] Board stability timeout — proceeding anyway")
+        return False
+
     def _game_iteration(self) -> bool:
         """
         Single iteration of the game loop.
@@ -204,12 +250,14 @@ class BejewelBot:
 
         blacklist = self.board_move_blacklist.setdefault(board_signature, set())
 
-        # Cells containing special gems (flame, star, hypercube) should not be swapped
+        # Cells containing flame/star gems should not be swapped.
+        # Hypercube (gem ID 21) is ALLOWED — it's a high-value move.
         special_gem_ids = set()
         if self.detector.normal_gem_count:
             for r in range(BOARD_HEIGHT):
                 for c in range(BOARD_WIDTH):
-                    if board[r, c] >= self.detector.normal_gem_count:
+                    gid = board[r, c]
+                    if gid >= self.detector.normal_gem_count and gid != HYPERCUBE_GEM_ID:
                         special_gem_ids.add((r, c))
 
         # Anti-loop detection: if the same move repeats 3+ times, skip it
@@ -294,8 +342,8 @@ class BejewelBot:
                 board,
             )
 
-        # 6. Wait before next move
-        time.sleep(MOVE_DELAY / 1000.0)
+        # 6. Wait for cascades to settle before the next iteration
+        self._wait_for_board_stable()
 
         return True
 
@@ -329,7 +377,7 @@ class BejewelBot:
             pyautogui.moveTo(x1, y1, duration=0.0)
             pyautogui.dragTo(x2, y2, duration=0.05, button="left")
 
-            time.sleep(MOVE_DELAY / 1000.0)
+            time.sleep(0.1)  # Brief pause for swap to register; cascade wait is in _game_iteration
             return True
 
         except Exception as e:

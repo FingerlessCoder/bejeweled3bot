@@ -176,15 +176,18 @@ class BoardDetector:
         self.normal_gem_count = len(GEM_COLORS)
 
     def _get_color_center(self, gem_type: str) -> Tuple[float, float, float]:
-        """Return the midpoint of the configured RGB range for a gem."""
+        """Return the midpoint BGR of a gem's configured range.
+
+        GEM_COLORS stores ranges as (R, G, B) — convert to BGR for OpenCV.
+        """
         if self.color_reference and gem_type in self.color_reference:
             avg = self.color_reference[gem_type].get("avg_bgr", [0, 0, 0])
             return tuple(float(x) for x in avg)
         rgb_min, rgb_max = GEM_COLORS[gem_type]
         return (
-            (rgb_min[0] + rgb_max[0]) / 2.0,
-            (rgb_min[1] + rgb_max[1]) / 2.0,
-            (rgb_min[2] + rgb_max[2]) / 2.0,
+            (rgb_min[2] + rgb_max[2]) / 2.0,  # B
+            (rgb_min[1] + rgb_max[1]) / 2.0,  # G
+            (rgb_min[0] + rgb_max[0]) / 2.0,  # R
         )
 
     def _load_gem_templates(self) -> dict:
@@ -375,10 +378,12 @@ class BoardDetector:
                 max_bgr = data.get("max_bgr", [255, 255, 255])
                 color_ranges[gem_type] = (tuple(min_bgr), tuple(max_bgr))
         else:
-            color_ranges = {
-                gem_type: (rgb_min, rgb_max)
-                for gem_type, (rgb_min, rgb_max) in GEM_COLORS.items()
-            }
+            # GEM_COLORS stores (R, G, B) — swap to (B, G, R) for OpenCV
+            color_ranges = {}
+            for gem_type, (rgb_min, rgb_max) in GEM_COLORS.items():
+                bgr_min = (rgb_min[2], rgb_min[1], rgb_min[0])
+                bgr_max = (rgb_max[2], rgb_max[1], rgb_max[0])
+                color_ranges[gem_type] = (bgr_min, bgr_max)
 
         best_match = "unknown"
         best_score = float("inf")
@@ -852,7 +857,8 @@ class BoardDetector:
             # Prefer a saved calibration because it survives window resizes.
             region = self._get_calibrated_board_region()
             if region is not None:
-                print("[DEBUG] Using saved board calibration")
+                if DEBUG_MODE:
+                    print("[DEBUG] Using saved board calibration")
                 board_x_offset, board_y_offset, w, h = region
                 cell_width = w / BOARD_WIDTH
                 cell_height = h / BOARD_HEIGHT

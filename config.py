@@ -76,6 +76,10 @@ CALIBRATION_FILE = "board_calibration.json"
 # Timing settings (milliseconds)
 MOVE_DELAY = 200  # Delay after executing a move
 
+# Gem type ID boundaries (matches vision.py's deterministic mapping)
+NORMAL_GEM_COUNT = 7
+HYPERCUBE_GEM_ID = 21
+
 # Match detection
 MIN_MATCH_LENGTH = 3
 MIN_BOARD_COVERAGE = 0.75
@@ -90,7 +94,7 @@ CASCADE_DEPTH_BONUS = 50  # Points per cascade level
 IMMEDIATE_MATCH_WEIGHT = 10
 
 # Debug settings
-DEBUG_MODE = True
+DEBUG_MODE = False
 SAVE_DEBUG_SCREENSHOTS = True
 MAX_DEBUG_SCREENSHOTS = 64
 DEBUG_OUTPUT_DIR = "debug_output"
