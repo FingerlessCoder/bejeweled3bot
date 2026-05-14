@@ -25,7 +25,6 @@ from config import (
     MAX_DEBUG_SCREENSHOTS,
     MIN_BOARD_COVERAGE,
     CALIBRATION_FILE,
-    GAME_MODE,
 )
 import os
 from typing import Tuple, Optional
@@ -143,8 +142,10 @@ class BoardDetector:
         self.max_special_samples = 200
 
     def _get_calibration_profile(self, mode_override: str = "") -> str:
-        """Map runtime game mode to a calibration profile key."""
-        mode = mode_override if mode_override else str(GAME_MODE).strip().lower()
+        """Map runtime game mode to a calibration profile key.
+        Uses config module directly so runtime changes (e.g. from menu) take effect."""
+        import config as _cfg
+        mode = mode_override if mode_override else str(_cfg.GAME_MODE).strip().lower()
         if mode in ("classic", "zen"):
             return "classic"
         if mode in ("lightning", "ice_storm", "icestorm", "butterfly"):
