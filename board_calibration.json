@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "window_title": "Bejeweled",
+  "profiles": {
+    "classic": {
+      "normalized_board_region": {
+        "left": 0.3275,
+        "top": 0.11166666666666666,
+        "right": 0.9675,
+        "bottom": 0.9566666666666667
+      },
+      "saved_at": "2026-05-15 01:29:27"
+    },
+    "lightning": {
+      "normalized_board_region": {
+        "left": 0.3275,
+        "top": 0.11,
+        "right": 0.965,
+        "bottom": 0.9583333333333334
+      },
+      "saved_at": "2026-05-15 01:23:14"
+    }
+  }
+}
