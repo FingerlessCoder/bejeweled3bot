@@ -11,6 +11,7 @@ from PIL import ImageGrab
 import win32gui  # type: ignore[import-not-found]
 import time
 import glob
+import config as _cfg
 from config import (
     BOARD_WIDTH,
     BOARD_HEIGHT,
@@ -19,11 +20,8 @@ from config import (
     GAME_WINDOW_TITLE,
     GAME_RESOLUTION,
     RESOLUTION_CONFIGS,
-    DEBUG_MODE,
     DEBUG_OUTPUT_DIR,
-    SAVE_DEBUG_SCREENSHOTS,
     MAX_DEBUG_SCREENSHOTS,
-    MIN_BOARD_COVERAGE,
     CALIBRATION_FILE,
     GEM_TEMPLATE_SIZE,
     SPECIAL_TEMPLATE_SIZE,
@@ -994,7 +992,7 @@ class BoardDetector:
         # 1. Saved manual calibration (survives window resizes)
         region = self._get_calibrated_board_region()
         if region is not None:
-            if DEBUG_MODE:
+            if _cfg.DEBUG_MODE:
                 print("[DEBUG] Using saved board calibration")
             board_x_offset, board_y_offset, w, h = region
             cell_width = w / BOARD_WIDTH
@@ -1087,14 +1085,14 @@ class BoardDetector:
             self.last_coverage = detected_cells / float(BOARD_WIDTH * BOARD_HEIGHT)
 
             # Phase 4: Coverage check
-            if self.last_coverage < MIN_BOARD_COVERAGE:
+            if self.last_coverage < _cfg.MIN_BOARD_COVERAGE:
                 print(
                     f"[WARNING] Low board coverage: {detected_cells}/{BOARD_WIDTH * BOARD_HEIGHT} cells ({self.last_coverage:.1%})"
                 )
                 return None
 
             # Phase 5: Debug
-            if DEBUG_MODE:
+            if _cfg.DEBUG_MODE:
                 self._save_debug_screenshot(screenshot, region, board)
 
             return board
@@ -1112,7 +1110,7 @@ class BoardDetector:
         board: np.ndarray,
     ):
         """Save screenshot with grid overlay for debugging."""
-        if not SAVE_DEBUG_SCREENSHOTS:
+        if not _cfg.SAVE_DEBUG_SCREENSHOTS:
             return
 
         if self.debug_screenshot_count >= MAX_DEBUG_SCREENSHOTS:

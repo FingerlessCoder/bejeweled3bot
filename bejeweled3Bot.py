@@ -13,7 +13,7 @@ import config as cfg
 from vision import BoardDetector
 from ai_player import AIPlayer
 from debug import BotLogger, BoardVisualizer
-from config import DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, STAR_GEM_OFFSET
+from config import BOARD_WIDTH, BOARD_HEIGHT, STAR_GEM_OFFSET
 from config import MIN_CELL_CONFIDENCE
 
 # ADDED: Remove default pyautogui pause to speed up hardware execution
@@ -40,7 +40,7 @@ class BejewelBot:
             self.ai_player = PokerAIPlayer()
         else:
             self.ai_player = AIPlayer()
-        self.logger = BotLogger() if LOG_MOVES else None
+        self.logger = BotLogger() if cfg.LOG_MOVES else None
         self.move_count = 0
         self.last_move_time = 0
         self.game_active = False
@@ -364,7 +364,7 @@ class BejewelBot:
         board_signature = self._board_signature(board)
 
         # Debug: print board state for visual validation
-        if DEBUG_MODE:
+        if cfg.DEBUG_MODE:
             from debug import BoardVisualizer
             BoardVisualizer.print_board_detailed(
                 board,
@@ -400,7 +400,7 @@ class BejewelBot:
             self._global_blacklist[move] = 3
 
         # 3. Debug output
-        if DEBUG_MODE:
+        if cfg.DEBUG_MODE:
             coverage = self.detector.last_coverage * 100.0
             print(f"[BOT] Board coverage: {coverage:.1f}%")
 
@@ -559,19 +559,45 @@ class BejewelBot:
 
 
 def _select_game_mode() -> str:
-    """Prompt user to pick game mode and update config."""
+    """Prompt user to pick game mode and update config (including mode overrides)."""
     gm = input("Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm/Butterfly, 3=Poker): ").strip()
-    if gm == "2":
-        selected = "lightning"
-    elif gm == "3":
-        selected = "poker"
-    else:
-        selected = "classic"
+    mode_map = {"1": "classic", "2": "lightning", "3": "poker"}
+    selected = mode_map.get(gm, "classic")
     import config as cfg
 
-    cfg.GAME_MODE = selected
+    cfg.set_mode(selected)
     print(f"[CONFIG] Game mode set to '{selected}'")
     return selected
+
+
+def _settings_menu():
+    """Toggle runtime flags: debug_mode, save_debug_screenshots, wait_for_board_stable."""
+    import config as cfg
+
+    while True:
+        on = "\u2713"  # checkmark
+        off = "\u2717"  # cross
+        print()
+        print("--- Settings ---")
+        print(f" 1. Debug mode:            {on if cfg.DEBUG_MODE else off}")
+        print(f" 2. Save debug screenshots: {on if cfg.SAVE_DEBUG_SCREENSHOTS else off}")
+        print(f" 3. Wait for board stable:  {on if cfg.WAIT_FOR_BOARD_STABLE else off}")
+        print(" Q. Back to main menu")
+        choice = input("Toggle which setting? (1-3, Q): ").strip().lower()
+
+        if choice == "1":
+            cfg.DEBUG_MODE = not cfg.DEBUG_MODE
+            print(f"  -> Debug mode {'ON' if cfg.DEBUG_MODE else 'OFF'}")
+        elif choice == "2":
+            cfg.SAVE_DEBUG_SCREENSHOTS = not cfg.SAVE_DEBUG_SCREENSHOTS
+            print(f"  -> Save screenshots {'ON' if cfg.SAVE_DEBUG_SCREENSHOTS else 'OFF'}")
+        elif choice == "3":
+            cfg.WAIT_FOR_BOARD_STABLE = not cfg.WAIT_FOR_BOARD_STABLE
+            print(f"  -> Wait for board stable {'ON' if cfg.WAIT_FOR_BOARD_STABLE else 'OFF'}")
+        elif choice in ("q", "quit", ""):
+            break
+        else:
+            print("Invalid choice")
 
 
 def main():
@@ -580,10 +606,16 @@ def main():
     print("=" * 60)
 
     mode = (
-        input("Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board): ")
+        input("Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board, 5=Settings): ")
         .strip()
         .lower()
     )
+
+    # Settings: toggle flags before running
+    if mode in ("5", "settings"):
+        _settings_menu()
+        # After settings, re-prompt main menu
+        return main()
 
     # Calibrate: ask game mode FIRST, before any window interaction
     if mode in ("4", "calibrate"):
