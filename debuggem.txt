@@ -1,0 +1,1029 @@
+C:\Users\Wilso\AppData\Local\Python\pythoncore-3.14-64\python.exe c:/Users/Wilso/Downloads/bejeweled3bot/bejeweled3Bot.py
+py
+Bejeweled 3 Bot
+============================================================
+Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board): 1
+Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm/Butterfly, 3=Poker): 3
+[CONFIG] Game mode set to 'poker'
+[DEBUG] Loaded 7 gem webp templates
+[DEBUG] Loaded 15 special gem templates (64x64)
+Duration in seconds (ENTER for unlimited): 
+[BOT] Starting Bejeweled 3 Bot (no time limit)
+[BOT] Press Q to quit, SPACE to pause/resume
+[BOT] Make sure the game window is focused and visible!
+[BOT] Game can be any resolution (800x600, 1024x768, 1920x1200, etc.)
+[BOT] Auto mode controls: SPACE pause/resume, Q quit
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003839.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |       ORAN 0.90 |       YELL 0.87 |        RED 0.92 |       BLUE 0.86 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       ORAN 0.91 |       GREE 0.91 |       GREE 0.90 |       WHIT 0.82 |       ORAN 0.83 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       BLUE 0.91 |        RED 0.93 |       PURP 0.81 |       YELL 0.82 |       PURP 0.76 |       ORAN 0.79
+  row 3:       YELL 0.88 |       GREE 0.92 |       WHIT 0.87 |       BLUE 0.89 |       YELL 0.84 |       WHIT 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |        RED 0.95 |       BLUE 0.92 |       GREE 0.91 |        RED 0.92 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |       GREE 0.94 |       ORAN 0.91 |       YELL 0.88 |       WHIT 0.84 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.92 |       GREE 0.93 |       GREE 0.92 |       YELL 0.87 |       GREE 0.89 |       WHIT 0.80 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.93 |       WHIT 0.90 |       GREE 0.92 |       WHIT 0.84 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               : 11
+  orange              :  8
+  purple              :  6
+  red                 :  6
+  white               : 13
+  yellow              : 12
+
+[AI] Selected move: (6,4) <-> (6,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,4) -> (6,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003841.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003841.png
+  [Hand] Match 1 | Cards: [w] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 1.9s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003841.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |       ORAN 0.90 |       YELL 0.87 |       BLUE 0.88 |       BLUE 0.86 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       ORAN 0.91 |       GREE 0.91 |       GREE 0.90 |       YELL 0.84 |       ORAN 0.83 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       BLUE 0.91 |        RED 0.93 |        RED 0.92 |       YELL 0.82 |       PURP 0.76 |       ORAN 0.79
+  row 3:       YELL 0.88 |       GREE 0.92 |       WHIT 0.87 |       BLUE 0.89 |        RED 0.91 |       WHIT 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |        RED 0.95 |       BLUE 0.92 |       GREE 0.91 |       WHIT 0.83 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |       GREE 0.94 |       ORAN 0.91 |       YELL 0.88 |       PURP 0.82 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.92 |       GREE 0.93 |       GREE 0.92 |       YELL 0.87 |       YELL 0.84 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.93 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  9
+  green               : 11
+  orange              :  8
+  purple              :  6
+  red                 :  7
+  white               : 10
+  yellow              : 13
+
+[AI] Selected move: (3,2) <-> (3,3)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,2) -> (3,3)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003843.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003843.png
+  [Hand] Match 2 | Cards: [w,b] | Current: none (0 pts) | Next eval in 3 moves
+[BOT] Elapsed: 3.6s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003843.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |       WHIT 0.87 |       YELL 0.87 |       BLUE 0.88 |       BLUE 0.86 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       ORAN 0.91 |        RED 0.93 |       GREE 0.90 |       YELL 0.84 |       ORAN 0.83 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       BLUE 0.91 |        RED 0.93 |        RED 0.92 |       YELL 0.82 |       PURP 0.76 |       ORAN 0.79
+  row 3:       YELL 0.88 |       GREE 0.92 |       ORAN 0.89 |       WHIT 0.85 |        RED 0.91 |       WHIT 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |        RED 0.95 |       GREE 0.92 |       GREE 0.91 |       WHIT 0.83 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |       GREE 0.94 |       ORAN 0.91 |       YELL 0.88 |       PURP 0.82 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.92 |       GREE 0.93 |       GREE 0.92 |       YELL 0.87 |       YELL 0.84 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.93 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 11
+  orange              :  8
+  purple              :  6
+  red                 :  8
+  white               : 11
+  yellow              : 13
+
+[AI] Selected move: (3,3) <-> (4,3)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,3) -> (4,3)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003844.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003845.png
+  [Hand] Match 3 | Cards: [w,b,w] | Current: pair (2500 pts) | Next eval in 2 moves
+[BOT] Elapsed: 5.4s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003845.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |       WHIT 0.87 |        RED 0.93 |        RED 0.92 |       PURP 0.79 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       ORAN 0.91 |        RED 0.93 |       YELL 0.86 |       BLUE 0.87 |       BLUE 0.85 |       WHIT 0.77 |       GREE 0.79
+  row 2:       PURP 0.87 |       YELL 0.88 |       BLUE 0.91 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.83 |       PURP 0.71 |       YELL 0.54
+  row 3:       YELL 0.88 |       GREE 0.92 |       ORAN 0.89 |        RED 0.92 |        RED 0.91 |       YELL 0.80 |       BLUE 0.49 |       BLUE 0.70
+  row 4:       WHIT 0.91 |        RED 0.95 |       GREE 0.92 |       GREE 0.91 |        RED 0.87 |       WHIT 0.72 |       BLUE 0.72 |       BLUE 0.82
+  row 5:       YELL 0.90 |       GREE 0.94 |       ORAN 0.91 |       YELL 0.85 |       PURP 0.55 |       PURP 0.69 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.92 |       GREE 0.93 |       GREE 0.86 |       YELL 0.62 |       YELL 0.74 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.87 |       WHIT 0.76 |       GREE 0.71 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 11
+  orange              :  7
+  purple              :  7
+  red                 : 10
+  white               :  8
+  yellow              : 14
+
+[AI] Selected move: (0,2) <-> (1,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (0,2) -> (1,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003846.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003846.png
+  [Hand] Match 4 | Cards: [w,b,w,r] | Current: pair (2500 pts) | Next eval in 1 moves
+[BOT] Elapsed: 7.1s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003847.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |       WHIT 0.87 |       YELL 0.87 |       BLUE 0.88 |       PURP 0.79 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       ORAN 0.91 |       WHIT 0.87 |       YELL 0.86 |       BLUE 0.87 |       BLUE 0.85 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       BLUE 0.91 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.83 |       PURP 0.76 |       ORAN 0.79
+  row 3:       YELL 0.88 |       GREE 0.92 |       ORAN 0.89 |        RED 0.92 |        RED 0.91 |       YELL 0.82 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |        RED 0.95 |       GREE 0.92 |       GREE 0.91 |        RED 0.92 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |       GREE 0.94 |       ORAN 0.91 |       YELL 0.88 |       PURP 0.82 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.92 |       GREE 0.93 |       GREE 0.92 |       YELL 0.87 |       YELL 0.84 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.93 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               : 11
+  orange              :  8
+  purple              :  7
+  red                 :  7
+  white               :  9
+  yellow              : 14
+
+[AI] Selected move: (3,1) <-> (4,1)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,1) -> (4,1)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003848.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003848.png
+  [Hand] Match 5 | Cards: [w,b,w,r,g] | Current: pair (2500 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** pair = 2500 pts | Stack: [w,b,w,r,g]
+[BOT] Elapsed: 9.2s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003849.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.76 |       WHIT 0.76 |       BLUE 0.83 |       GREE 0.84 |       BLUE 0.81 |       PURP 0.74 |       PURP 0.72 |        RED 0.84
+  row 1:       ORAN 0.82 |       YELL 0.79 |       WHIT 0.75 |       YELL 0.77 |       BLUE 0.80 |       BLUE 0.78 |       WHIT 0.67 |       GREE 0.79
+  row 2:       PURP 0.79 |       YELL 0.79 |       WHIT 0.75 |       YELL 0.72 |       YELL 0.70 |       ORAN 0.76 |       PURP 0.71 |       ORAN 0.73
+  row 3:       YELL 0.78 |       ORAN 0.72 |       BLUE 0.76 |       GREE 0.73 |        RED 0.73 |       YELL 0.65 |       BLUE 0.71 |       BLUE 0.75
+  row 4:       WHIT 0.77 |       YELL 0.71 |       ORAN 0.76 |        RED 0.78 |        RED 0.77 |       WHIT 0.67 |       BLUE 0.70 |       BLUE 0.76
+  row 5:       YELL 0.80 |        RED 0.88 |       ORAN 0.82 |       YELL 0.74 |       PURP 0.75 |       PURP 0.74 |       YELL 0.72 |       YELL 0.71
+  row 6:       ORAN 0.82 |     G_star 0.73 |       GREE 0.85 |       YELL 0.78 |       YELL 0.76 |       GREE 0.82 |       YELL 0.72 |        RED 0.85
+  row 7:       WHIT 0.79 |       PURP 0.84 |       WHIT 0.77 |       GREE 0.86 |        RED 0.88 |       GREE 0.83 |       ORAN 0.75 |       WHIT 0.65
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  9
+  green               :  7
+  green_star          :  1
+  orange              :  8
+  purple              :  7
+  red                 :  7
+  white               : 10
+  yellow              : 15
+
+[AI] Selected move: (3,0) <-> (3,1)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,0) -> (3,1)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003850.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003850.png
+  [Hand] Match 6 | Cards: [y] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 11.1s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003851.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |       GREE 0.90 |       BLUE 0.88 |       PURP 0.79 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |       YELL 0.86 |       BLUE 0.87 |       BLUE 0.85 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       YELL 0.87 |       YELL 0.85 |       ORAN 0.83 |       PURP 0.76 |       ORAN 0.79
+  row 3:       ORAN 0.90 |       WHIT 0.84 |       BLUE 0.90 |       GREE 0.89 |        RED 0.91 |       YELL 0.82 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.87 |       YELL 0.90 |       ORAN 0.89 |        RED 0.93 |        RED 0.92 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.85 |       ORAN 0.91 |       YELL 0.88 |       PURP 0.82 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.72 |       GREE 0.89 |       YELL 0.87 |       YELL 0.84 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  9
+  green               :  7
+  green_star          :  1
+  orange              :  8
+  purple              :  7
+  red                 :  7
+  white               : 12
+  yellow              : 13
+
+[AI] Selected move: (2,5) <-> (3,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (2,5) -> (3,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003852.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003852.png
+  [Hand] Match 7 | Cards: [y,y] | Current: pair (2500 pts) | Next eval in 3 moves
+[BOT] Elapsed: 12.9s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003852.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |       PURP 0.84 |       PURP 0.81 |       WHIT 0.80 |       PURP 0.77 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |       GREE 0.90 |       BLUE 0.87 |       PURP 0.78 |       WHIT 0.77 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       YELL 0.87 |       BLUE 0.88 |       BLUE 0.86 |       PURP 0.76 |       ORAN 0.79
+  row 3:       ORAN 0.90 |       WHIT 0.85 |       BLUE 0.90 |       GREE 0.89 |        RED 0.91 |       ORAN 0.83 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.88 |       YELL 0.89 |       ORAN 0.89 |        RED 0.93 |        RED 0.92 |       WHIT 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.90 |       ORAN 0.91 |       YELL 0.88 |       PURP 0.82 |       PURP 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.72 |       GREE 0.89 |       YELL 0.87 |       YELL 0.84 |       GREE 0.87 |       YELL 0.79 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  9
+  green               :  7
+  green_star          :  1
+  orange              :  8
+  purple              :  9
+  red                 :  7
+  white               : 13
+  yellow              : 10
+
+[AI] Selected move: (6,5) <-> (6,6)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,5) -> (6,6)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003854.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003854.png
+  [Hand] Match 8 | Cards: [y,y,y] | Current: three_of_a_kind (10000 pts) | Next eval in 2 moves
+[BOT] Elapsed: 15.0s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003854.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |        RED 0.93 |       PURP 0.81 |       ORAN 0.84 |       YELL 0.80 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |       PURP 0.84 |        RED 0.91 |       WHIT 0.79 |       PURP 0.76 |        RED 0.88
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |       PURP 0.81 |       PURP 0.72 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.90 |       WHIT 0.87 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.78 |       BLUE 0.73 |       PURP 0.75 |       ORAN 0.79
+  row 4:       WHIT 0.91 |       YELL 0.92 |       ORAN 0.90 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.90 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.71
+  row 6:       ORAN 0.90 |     G_star 0.78 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.69 |       WHIT 0.61
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.71 |       WHIT 0.59 |       WHIT 0.77
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               :  7
+  green_star          :  1
+  orange              :  8
+  purple              : 10
+  red                 :  8
+  white               : 15
+  yellow              :  8
+
+[AI] Selected move: (1,3) <-> (2,3)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (1,3) -> (2,3)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003856.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003856.png
+  [Hand] Match 9 | Cards: [y,y,y,p] | Current: three_of_a_kind (10000 pts) | Next eval in 1 moves
+[BOT] Elapsed: 16.9s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003856.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |       GREE 0.90 |       BLUE 0.88 |       PURP 0.79 |       YELL 0.80 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |        RED 0.93 |       PURP 0.81 |       ORAN 0.83 |       PURP 0.76 |        RED 0.88
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.90 |       WHIT 0.86 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.83 |    B_flame 0.74 |       PURP 0.75 |       ORAN 0.79
+  row 4:       WHIT 0.88 |       YELL 0.90 |       ORAN 0.91 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.89 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.75 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  blue_flame          :  1
+  green               :  8
+  green_star          :  1
+  orange              :  9
+  purple              :  8
+  red                 :  9
+  white               : 13
+  yellow              :  8
+
+[AI] Selected move: (0,5) <-> (1,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (0,5) -> (1,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003859.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003859.png
+  [Hand] Match 10 | Cards: [y,y,y,p,p] | Current: full_house (15000 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** full_house = 15000 pts | Stack: [y,y,y,p,p]
+[BOT] Elapsed: 20.2s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003900.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |        RED 0.93 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |        RED 0.81
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.78 |     W_star 0.51
+  row 3:       ORAN 0.90 |       WHIT 0.86 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.84 |       BLUE 0.69 |       PURP 0.48 |       ORAN 0.72
+  row 4:       WHIT 0.89 |       YELL 0.89 |       ORAN 0.89 |       GREE 0.91 |        RED 0.84 |       WHIT 0.60 |       BLUE 0.74 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.88 |       ORAN 0.91 |        RED 0.85 |       WHIT 0.57 |       WHIT 0.79 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.76 |       GREE 0.80 |       YELL 0.54 |       PURP 0.72 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.83 |       WHIT 0.74 |       GREE 0.75 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               :  8
+  green_star          :  1
+  orange              :  9
+  purple              :  5
+  red                 :  8
+  white               : 15
+  white_star          :  1
+  yellow              :  9
+
+[AI] Selected move: (4,4) <-> (5,4)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (4,4) -> (5,4)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003901.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003902.png
+  [Hand] Match 11 | Cards: [w] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 22.3s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003902.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       WHIT 0.89 |       BLUE 0.91 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       WHIT 0.87 |        RED 0.93 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |        RED 0.88
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.90 |       WHIT 0.85 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.87 |    B_flame 0.68 |       PURP 0.75 |       ORAN 0.79
+  row 4:       WHIT 0.88 |       YELL 0.91 |       ORAN 0.89 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.91 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.69 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  blue_flame          :  1
+  green               :  9
+  green_star          :  1
+  orange              : 10
+  purple              :  5
+  red                 :  9
+  white               : 13
+  yellow              :  9
+
+[AI] Selected move: (0,1) <-> (0,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (0,1) -> (0,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003903.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003904.png
+  [Hand] Match 12 | Cards: [w,w] | Current: pair (2500 pts) | Next eval in 3 moves
+[BOT] Elapsed: 24.3s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003904.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       BLUE 0.93 |       WHIT 0.87 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       GREE 0.91 |        RED 0.93 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |        RED 0.88
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.90 |       WHIT 0.87 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.84 |    B_flame 0.69 |       PURP 0.73 |       ORAN 0.79
+  row 4:       WHIT 0.90 |       YELL 0.92 |       ORAN 0.91 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.93 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.73 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  blue_flame          :  1
+  green               : 10
+  green_star          :  1
+  orange              : 10
+  purple              :  5
+  red                 :  9
+  white               : 12
+  yellow              :  9
+
+[AI] Selected move: (1,1) <-> (1,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (1,1) -> (1,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003905.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003905.png
+  [Hand] Match 13 | Cards: [w,w,w] | Current: three_of_a_kind (10000 pts) | Next eval in 2 moves
+[BOT] Elapsed: 26.2s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003906.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       BLUE 0.86 |       WHIT 0.72 |       GREE 0.74 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |       BLUE 0.82
+  row 1:       ORAN 0.84 |       WHIT 0.57 |       ORAN 0.78 |        RED 0.93 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |        RED 0.88
+  row 2:       PURP 0.55 |       YELL 0.79 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.78 |       WHIT 0.85 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.87 |       BLUE 0.80 |       PURP 0.74 |       ORAN 0.79
+  row 4:       WHIT 0.89 |       YELL 0.86 |       ORAN 0.89 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.91 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.72 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               :  9
+  green_star          :  1
+  orange              : 11
+  purple              :  5
+  red                 :  9
+  white               : 12
+  yellow              :  9
+
+[AI] Selected move: (2,1) <-> (2,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (2,1) -> (2,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003907.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003907.png
+  [Hand] Match 14 | Cards: [w,w,w,w] | Current: four_of_a_kind (30000 pts) | Next eval in 1 moves
+[BOT] Elapsed: 27.7s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003907.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       BLUE 0.93 |       WHIT 0.87 |       GREE 0.90 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |       BLUE 0.82
+  row 1:       ORAN 0.91 |       GREE 0.92 |       ORAN 0.90 |        RED 0.93 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |        RED 0.88
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.77 |       GREE 0.83
+  row 3:       ORAN 0.90 |       WHIT 0.86 |       BLUE 0.90 |       YELL 0.86 |       BLUE 0.87 |       BLUE 0.80 |       PURP 0.75 |       ORAN 0.79
+  row 4:       WHIT 0.89 |       YELL 0.88 |       ORAN 0.89 |       GREE 0.91 |        RED 0.92 |       ORAN 0.85 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       YELL 0.90 |        RED 0.90 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       YELL 0.79 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.69 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               : 10
+  green_star          :  1
+  orange              : 11
+  purple              :  5
+  red                 :  9
+  white               : 11
+  yellow              :  9
+
+[AI] Selected move: (3,5) <-> (4,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,5) -> (4,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003909.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003909.png
+  [Hand] Match 15 | Cards: [w,w,w,w,b] | Current: four_of_a_kind (30000 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** four_of_a_kind = 30000 pts | Stack: [w,w,w,w,b]
+[BOT] Elapsed: 29.6s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003909.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       BLUE 0.93 |       WHIT 0.87 |       GREE 0.90 |       WHIT 0.83 |       GREE 0.87 |       BLUE 0.84 |       GREE 0.83
+  row 1:       ORAN 0.91 |       GREE 0.92 |       ORAN 0.90 |        RED 0.93 |       WHIT 0.82 |       ORAN 0.83 |       BLUE 0.83 |       BLUE 0.81
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       GREE 0.87 |       ORAN 0.81 |        RED 0.88
+  row 3:       ORAN 0.90 |       WHIT 0.87 |       BLUE 0.90 |       YELL 0.86 |       YELL 0.84 |       ORAN 0.83 |       GREE 0.85 |       GREE 0.83
+  row 4:       WHIT 0.90 |       YELL 0.92 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.88 |       ORAN 0.84 |       YELL 0.79 |       ORAN 0.79
+  row 5:       YELL 0.90 |        RED 0.92 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.81 |       WHIT 0.78 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.76 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  6
+  green               : 13
+  green_star          :  1
+  orange              : 12
+  purple              :  4
+  red                 :  8
+  white               : 12
+  yellow              :  8
+
+[AI] Selected move: (2,5) <-> (2,6)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (2,5) -> (2,6)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003911.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003911.png
+  [Hand] Match 16 | Cards: [o] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 31.8s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003911.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       BLUE 0.93 |       WHIT 0.87 |       GREE 0.90 |       WHIT 0.83 |       ORAN 0.84 |       WHIT 0.78 |       WHIT 0.75
+  row 1:       ORAN 0.91 |       GREE 0.92 |       ORAN 0.90 |        RED 0.93 |       WHIT 0.82 |       BLUE 0.85 |       BLUE 0.83 |       GREE 0.83
+  row 2:       PURP 0.87 |       YELL 0.88 |       WHIT 0.87 |       GREE 0.90 |        RED 0.92 |       PURP 0.78 |       BLUE 0.84 |       BLUE 0.82
+  row 3:       ORAN 0.90 |       WHIT 0.87 |       BLUE 0.90 |       YELL 0.86 |       YELL 0.84 |       WHIT 0.80 |       GREE 0.85 |        RED 0.88
+  row 4:       WHIT 0.91 |       YELL 0.92 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.88 |       ORAN 0.80 |       YELL 0.79 |       ORAN 0.79
+  row 5:       YELL 0.90 |        RED 0.91 |       ORAN 0.91 |        RED 0.94 |        RED 0.92 |       WHIT 0.80 |       WHIT 0.78 |       YELL 0.77
+  row 6:       ORAN 0.90 |     G_star 0.78 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 10
+  green_star          :  1
+  orange              : 10
+  purple              :  5
+  red                 :  8
+  white               : 15
+  yellow              :  8
+
+[AI] Selected move: (5,1) <-> (5,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,1) -> (5,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003913.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003913.png
+  [Hand] Match 17 | Cards: [o,r] | Current: none (0 pts) | Next eval in 3 moves
+[BOT] Elapsed: 33.9s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003913.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.76 |       BLUE 0.85 |       YELL 0.79 |       ORAN 0.80 |       GREE 0.83 |       ORAN 0.76 |       WHIT 0.68 |       WHIT 0.66
+  row 1:       ORAN 0.82 |       GREE 0.85 |       WHIT 0.75 |       GREE 0.84 |       WHIT 0.71 |       BLUE 0.78 |       BLUE 0.77 |       GREE 0.79
+  row 2:       PURP 0.79 |       YELL 0.79 |       ORAN 0.81 |        RED 0.80 |       WHIT 0.71 |       PURP 0.73 |       BLUE 0.77 |       BLUE 0.76
+  row 3:       ORAN 0.81 |       WHIT 0.72 |       WHIT 0.71 |       GREE 0.73 |        RED 0.73 |       WHIT 0.70 |       GREE 0.69 |        RED 0.84
+  row 4:       WHIT 0.80 |       YELL 0.74 |       BLUE 0.72 |       YELL 0.70 |       YELL 0.71 |       ORAN 0.74 |       YELL 0.67 |       ORAN 0.72
+  row 5:       YELL 0.80 |       ORAN 0.84 |       ORAN 0.82 |       GREE 0.77 |       BLUE 0.71 |       WHIT 0.73 |       WHIT 0.68 |       YELL 0.71
+  row 6:       ORAN 0.82 |     G_star 0.70 |       GREE 0.85 |       YELL 0.78 |       PURP 0.76 |       PURP 0.74 |       GREE 0.81 |        RED 0.85
+  row 7:       WHIT 0.79 |       PURP 0.84 |       WHIT 0.77 |       GREE 0.86 |        RED 0.88 |       GREE 0.83 |       ORAN 0.75 |       WHIT 0.65
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 11
+  green_star          :  1
+  orange              : 11
+  purple              :  5
+  red                 :  5
+  white               : 15
+  yellow              :  9
+
+[AI] Selected move: (5,0) <-> (6,0)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,0) -> (6,0)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003915.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003915.png
+  [Hand] Match 18 | Cards: [o,r,o] | Current: pair (2500 pts) | Next eval in 2 moves
+[BOT] Elapsed: 35.7s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003915.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       WHIT 0.89 |       YELL 0.89 |        RED 0.94 |       ORAN 0.88 |       GREE 0.88 |       ORAN 0.84 |       WHIT 0.78 |       WHIT 0.75
+  row 1:       WHIT 0.88 |       BLUE 0.92 |       YELL 0.88 |       GREE 0.90 |       WHIT 0.82 |       BLUE 0.85 |       BLUE 0.83 |       GREE 0.83
+  row 2:       ORAN 0.91 |       GREE 0.92 |       WHIT 0.87 |        RED 0.93 |       WHIT 0.82 |       PURP 0.78 |       BLUE 0.84 |       BLUE 0.82
+  row 3:       PURP 0.87 |       YELL 0.88 |       ORAN 0.89 |       GREE 0.89 |        RED 0.91 |       WHIT 0.80 |       GREE 0.85 |        RED 0.88
+  row 4:       ORAN 0.92 |       WHIT 0.87 |       WHIT 0.89 |       YELL 0.87 |       YELL 0.84 |       ORAN 0.82 |       YELL 0.79 |       ORAN 0.79
+  row 5:       WHIT 0.88 |       YELL 0.88 |       BLUE 0.86 |       GREE 0.91 |       BLUE 0.88 |       WHIT 0.81 |       WHIT 0.78 |       YELL 0.77
+  row 6:       YELL 0.87 |     G_star 0.70 |       GREE 0.89 |       YELL 0.87 |       PURP 0.82 |       PURP 0.79 |       GREE 0.86 |        RED 0.89
+  row 7:       WHIT 0.93 |       PURP 0.91 |       WHIT 0.90 |       GREE 0.92 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 11
+  green_star          :  1
+  orange              :  8
+  purple              :  5
+  red                 :  6
+  white               : 16
+  yellow              : 10
+
+[AI] Selected move: (6,3) <-> (7,3)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,3) -> (7,3)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003917.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003918.png
+  [Hand] Match 19 | Cards: [o,r,o,g] | Current: pair (2500 pts) | Next eval in 1 moves
+[BOT] Elapsed: 38.4s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003918.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       ORAN 0.91 |        RED 0.94 |        RED 0.94 |       ORAN 0.88 |        RED 0.92 |       ORAN 0.84 |       GREE 0.85 |        RED 0.88
+  row 1:       YELL 0.88 |        RED 0.94 |       ORAN 0.90 |       ORAN 0.88 |       GREE 0.88 |       ORAN 0.83 |       WHIT 0.77 |       WHIT 0.74
+  row 2:        RED 0.94 |       GREE 0.92 |        RED 0.94 |       GREE 0.90 |       WHIT 0.82 |       BLUE 0.86 |       BLUE 0.84 |       GREE 0.83
+  row 3:       WHIT 0.88 |       GREE 0.92 |        RED 0.93 |        RED 0.92 |       WHIT 0.82 |       PURP 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |       PURP 0.90 |       YELL 0.89 |       GREE 0.91 |        RED 0.92 |       WHIT 0.81 |       GREE 0.85 |        RED 0.88
+  row 5:       ORAN 0.93 |       WHIT 0.91 |       WHIT 0.89 |       YELL 0.88 |       YELL 0.85 |       ORAN 0.83 |       YELL 0.80 |       ORAN 0.80
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.88 |       WHIT 0.80 |       WHIT 0.77 |       YELL 0.77
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  6
+  green               : 11
+  orange              : 11
+  purple              :  3
+  red                 : 12
+  white               : 14
+  yellow              :  7
+
+[AI] Selected move: (1,4) <-> (1,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (1,4) -> (1,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003919.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003919.png
+  [Hand] Match 20 | Cards: [o,r,o,g,o] | Current: three_of_a_kind (10000 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** three_of_a_kind = 10000 pts | Stack: [o,r,o,g,o]
+[BOT] Elapsed: 40.2s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003920.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       ORAN 0.91 |        RED 0.94 |       BLUE 0.91 |       ORAN 0.88 |       YELL 0.85 |       ORAN 0.84 |       GREE 0.85 |        RED 0.88
+  row 1:       YELL 0.88 |        RED 0.94 |       GREE 0.91 |       ORAN 0.88 |        RED 0.91 |       GREE 0.86 |       WHIT 0.77 |       WHIT 0.74
+  row 2:        RED 0.94 |       GREE 0.92 |       BLUE 0.91 |       GREE 0.90 |       WHIT 0.82 |       BLUE 0.86 |       BLUE 0.84 |       GREE 0.83
+  row 3:       WHIT 0.88 |       GREE 0.92 |       ORAN 0.89 |        RED 0.92 |       WHIT 0.82 |       PURP 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |       PURP 0.90 |       YELL 0.89 |       GREE 0.91 |        RED 0.92 |       WHIT 0.81 |       GREE 0.85 |        RED 0.88
+  row 5:       ORAN 0.93 |       WHIT 0.91 |       WHIT 0.89 |       YELL 0.88 |       YELL 0.85 |       ORAN 0.82 |       YELL 0.80 |       ORAN 0.80
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.88 |       WHIT 0.80 |       WHIT 0.77 |       YELL 0.77
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  8
+  green               : 12
+  orange              : 10
+  purple              :  3
+  red                 :  9
+  white               : 14
+  yellow              :  8
+
+[AI] Selected move: (4,0) <-> (5,0)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (4,0) -> (5,0)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003922.png
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003922.png
+  [Hand] Match 21 | Cards: [w] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 43.0s (no limit)
+[DEBUG] Using saved board calibration
+[DEBUG] Screenshot saved: debug_output\board_debug_20260517_003923.png
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       ORAN 0.88 |       PURP 0.81 |       ORAN 0.84 |       GREE 0.85 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |        RED 0.93 |       YELL 0.84 |       GREE 0.86 |       WHIT 0.77 |       WHIT 0.74
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       GREE 0.90 |        RED 0.92 |       BLUE 0.86 |       BLUE 0.84 |       GREE 0.83
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |        RED 0.92 |       WHIT 0.82 |       PURP 0.79 |       BLUE 0.83 |       BLUE 0.81
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       WHIT 0.83 |       WHIT 0.81 |       GREE 0.85 |        RED 0.88
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |        RED 0.90 |       ORAN 0.85 |       YELL 0.79 |       ORAN 0.80
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.88 |       WHIT 0.80 |       WHIT 0.77 |       YELL 0.77
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       WHIT 0.75
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  6
+  green               : 12
+  orange              :  9
+  purple              :  6
+  red                 : 12
+  white               : 14
+  yellow              :  5
+
+[AI] Selected move: (6,7) <-> (7,7)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,7) -> (7,7)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 22 | Cards: [w,w] | Current: pair (2500 pts) | Next eval in 3 moves
+[BOT] Elapsed: 45.0s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.67 |       GREE 0.39 |       PURP 0.53 |        RED 0.59 |       PURP 0.51 |        RED 0.48 |        RED 0.49 |        RED 0.69
+  row 1:        RED 0.59 |       GREE 0.39 |       PURP 0.53 |        RED 0.71 |        RED 0.48 |        RED 0.58 |       GREE 0.65 |        RED 0.69
+  row 2:       YELL 0.49 |        RED 0.71 |        RED 0.57 |       HYPE 0.54 |        RED 0.49 |       HYPE 0.53 |       GREE 0.41 |       GREE 0.42
+  row 3:        RED 0.71 |       HYPE 0.58 |    P_flame 0.52 |    P_flame 0.42 |       WHIT 0.51 |       HYPE 0.61 |       WHIT 0.49 |       GREE 0.64
+  row 4:       GREE 0.39 |       HYPE 0.74 |       GREE 0.47 |        RED 0.41 |     R_star 0.47 |       PURP 0.47 |       HYPE 0.68 |       BLUE 0.57
+  row 5:        RED 0.59 |       PURP 0.54 |        RED 0.59 |       HYPE 0.65 |        RED 0.54 |       ORAN 0.40 |       GREE 0.65 |        RED 0.70
+  row 6:       PURP 0.53 |       GREE 0.67 |        RED 0.59 |       GREE 0.67 |       BLUE 0.59 |       ORAN 0.58 |       YELL 0.49 |        RED 0.58
+  row 7:       GREE 0.39 |       BLUE 0.61 |       GREE 0.39 |       YELL 0.49 |        RED 0.71 |       GREE 0.66 |        RED 0.58 |        RED 0.47
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  3
+  green               : 15
+  hypercube           :  7
+  orange              :  2
+  purple              :  6
+  purple_flame        :  2
+  red                 : 23
+  red_star            :  1
+  white               :  2
+  yellow              :  3
+
+[AI] Selected move: (6,2) <-> (7,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,2) -> (7,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 23 | Cards: [w,w,r] | Current: pair (2500 pts) | Next eval in 2 moves
+[BOT] Elapsed: 46.8s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       ORAN 0.88 |       PURP 0.81 |       YELL 0.82 |       YELL 0.80 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |        RED 0.93 |       YELL 0.84 |       ORAN 0.83 |       GREE 0.85 |        RED 0.88
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       GREE 0.90 |        RED 0.92 |       GREE 0.87 |       WHIT 0.77 |       WHIT 0.75
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |        RED 0.92 |       WHIT 0.82 |       BLUE 0.85 |       BLUE 0.83 |       GREE 0.83
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       WHIT 0.83 |       PURP 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |        RED 0.92 |       WHIT 0.81 |       GREE 0.86 |        RED 0.89
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.87 |       ORAN 0.83 |       YELL 0.79 |       ORAN 0.80
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       YELL 0.77
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  6
+  green               : 12
+  orange              :  9
+  purple              :  6
+  red                 : 13
+  white               : 11
+  yellow              :  7
+
+[AI] Selected move: (5,4) <-> (5,5)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,4) -> (5,5)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 24 | Cards: [w,w,r,w] | Current: three_of_a_kind (10000 pts) | Next eval in 1 moves
+[BOT] Elapsed: 48.6s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       ORAN 0.88 |        RED 0.92 |       YELL 0.82 |       YELL 0.80 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |        RED 0.93 |       WHIT 0.82 |       ORAN 0.83 |       GREE 0.85 |        RED 0.88
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       GREE 0.90 |       YELL 0.85 |       GREE 0.87 |       WHIT 0.77 |       WHIT 0.75
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |        RED 0.92 |       PURP 0.82 |       BLUE 0.85 |       BLUE 0.83 |       GREE 0.83
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       YELL 0.84 |       PURP 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |        RED 0.92 |        RED 0.89 |       GREE 0.86 |        RED 0.89
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.85 |       ORAN 0.85 |       YELL 0.79 |       ORAN 0.80
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.88 |       ORAN 0.82 |       YELL 0.77
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  6
+  green               : 12
+  orange              :  9
+  purple              :  6
+  red                 : 14
+  white               :  9
+  yellow              :  8
+
+[AI] Selected move: (5,3) <-> (5,4)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,3) -> (5,4)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 25 | Cards: [w,w,r,w,r] | Current: full_house (15000 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** full_house = 15000 pts | Stack: [w,w,r,w,r]
+[BOT] Elapsed: 50.3s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       WHIT 0.85 |        RED 0.92 |       YELL 0.82 |       YELL 0.80 |        RED 0.88
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |       WHIT 0.85 |       WHIT 0.82 |       ORAN 0.83 |       GREE 0.85 |        RED 0.88
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       BLUE 0.90 |       YELL 0.85 |       GREE 0.87 |       WHIT 0.77 |       WHIT 0.75
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |       ORAN 0.87 |       PURP 0.82 |       BLUE 0.85 |       BLUE 0.83 |       GREE 0.83
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       YELL 0.84 |       PURP 0.80 |       BLUE 0.84 |       BLUE 0.82
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |       GREE 0.89 |        RED 0.90 |       GREE 0.86 |        RED 0.89
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       BLUE 0.81 |       ORAN 0.83 |       YELL 0.79 |       ORAN 0.80
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |        RED 0.93 |       GREE 0.85 |       ORAN 0.82 |       YELL 0.77
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 12
+  orange              :  9
+  purple              :  6
+  red                 : 11
+  white               : 11
+  yellow              :  8
+
+[AI] Selected move: (6,6) <-> (7,6)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (6,6) -> (7,6)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 26 | Cards: [o] | Current: none (0 pts) | Next eval in 4 moves
+[BOT] Elapsed: 52.1s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       WHIT 0.85 |        RED 0.92 |       ORAN 0.84 |       GREE 0.85 |       ORAN 0.79
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |       WHIT 0.85 |       YELL 0.84 |       ORAN 0.83 |       WHIT 0.77 |        RED 0.88
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       BLUE 0.90 |       WHIT 0.82 |       WHIT 0.80 |       BLUE 0.84 |        RED 0.88
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |       ORAN 0.87 |        RED 0.91 |       YELL 0.82 |       YELL 0.79 |       WHIT 0.75
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       WHIT 0.83 |       ORAN 0.84 |       GREE 0.85 |       GREE 0.84
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |       YELL 0.85 |       GREE 0.88 |       WHIT 0.78 |       BLUE 0.82
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       PURP 0.82 |       BLUE 0.86 |       BLUE 0.83 |        RED 0.89
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |       YELL 0.85 |       PURP 0.80 |       BLUE 0.84 |       YELL 0.77
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  7
+  green               : 10
+  orange              :  9
+  purple              :  6
+  red                 : 10
+  white               : 14
+  yellow              :  8
+
+[AI] Selected move: (5,6) <-> (5,7)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,6) -> (5,7)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 27 | Cards: [o,b] | Current: none (0 pts) | Next eval in 3 moves
+[BOT] Elapsed: 53.7s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.93 |       WHIT 0.89 |       PURP 0.87 |       WHIT 0.85 |        RED 0.92 |       ORAN 0.84 |       WHIT 0.78 |       ORAN 0.79
+  row 1:       ORAN 0.91 |       WHIT 0.88 |       PURP 0.87 |       WHIT 0.85 |       YELL 0.84 |       ORAN 0.83 |       YELL 0.79 |        RED 0.88
+  row 2:       YELL 0.88 |        RED 0.94 |        RED 0.94 |       BLUE 0.90 |       WHIT 0.82 |       WHIT 0.80 |       ORAN 0.81 |        RED 0.88
+  row 3:        RED 0.94 |        RED 0.94 |       WHIT 0.87 |       ORAN 0.87 |        RED 0.91 |       YELL 0.82 |       GREE 0.85 |       WHIT 0.75
+  row 4:       WHIT 0.91 |       GREE 0.93 |       GREE 0.92 |        RED 0.93 |       WHIT 0.83 |       ORAN 0.84 |       WHIT 0.77 |       GREE 0.84
+  row 5:       ORAN 0.93 |       PURP 0.90 |       ORAN 0.91 |       GREE 0.91 |       YELL 0.85 |       GREE 0.88 |       BLUE 0.84 |       WHIT 0.76
+  row 6:       PURP 0.89 |       GREE 0.93 |       ORAN 0.91 |       GREE 0.91 |       PURP 0.82 |       BLUE 0.86 |       YELL 0.79 |        RED 0.64
+  row 7:       WHIT 0.93 |       BLUE 0.95 |       WHIT 0.90 |       YELL 0.88 |       YELL 0.85 |       PURP 0.79 |       GREE 0.63 |       YELL 0.60
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  4
+  green               : 10
+  orange              : 10
+  purple              :  6
+  red                 : 10
+  white               : 15
+  yellow              :  9
+
+[AI] Selected move: (2,5) <-> (2,6)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (2,5) -> (2,6)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 28 | Cards: [o,b,o] | Current: pair (2500 pts) | Next eval in 2 moves
+[BOT] Elapsed: 55.7s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.69 |       WHIT 0.40 |       PURP 0.56 |       WHIT 0.39 |        RED 0.73 |       YELL 0.51 |       GREE 0.40 |        RED 0.58
+  row 1:        RED 0.60 |       WHIT 0.40 |       PURP 0.56 |       ORAN 0.39 |       YELL 0.51 |       GREE 0.67 |       YELL 0.49 |        RED 0.71
+  row 2:       YELL 0.53 |        RED 0.73 |        RED 0.73 |       BLUE 0.50 |       WHIT 0.49 |       GREE 0.68 |       GREE 0.40 |        RED 0.71
+  row 3:        RED 0.73 |       HYPE 0.50 |    P_flame 0.53 |    P_flame 0.47 |     R_star 0.40 |       HYPE 0.53 |       WHIT 0.42 |       GREE 0.40
+  row 4:       WHIT 0.41 |       GREE 0.54 |       GREE 0.49 |        RED 0.46 |       WHIT 0.49 |       ORAN 0.50 |       WHIT 0.51 |       GREE 0.67
+  row 5:       ORAN 0.60 |       PURP 0.57 |       ORAN 0.60 |       GREE 0.59 |        RED 0.50 |       GREE 0.68 |       BLUE 0.60 |       GREE 0.40
+  row 6:       PURP 0.57 |       GREE 0.69 |       ORAN 0.60 |       GREE 0.67 |       PURP 0.54 |       BLUE 0.61 |       YELL 0.49 |        RED 0.71
+  row 7:       WHIT 0.41 |       BLUE 0.64 |       WHIT 0.41 |       YELL 0.52 |       YELL 0.51 |       PURP 0.53 |       GREE 0.68 |       YELL 0.48
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  4
+  green               : 15
+  hypercube           :  2
+  orange              :  5
+  purple              :  6
+  purple_flame        :  2
+  red                 : 11
+  red_star            :  1
+  white               : 10
+  yellow              :  8
+
+[AI] Selected move: (3,4) <-> (4,4)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (3,4) -> (4,4)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 29 | Cards: [o,b,o,r_h] | Current: pair (2500 pts) | Next eval in 1 moves
+[BOT] Elapsed: 57.7s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:       GREE 0.85 |       WHIT 0.74 |       PURP 0.78 |       WHIT 0.72 |        RED 0.86 |       YELL 0.73 |       WHIT 0.66 |       ORAN 0.72
+  row 1:       ORAN 0.80 |       WHIT 0.74 |       PURP 0.78 |       WHIT 0.71 |       YELL 0.75 |       GREE 0.81 |       YELL 0.71 |        RED 0.83
+  row 2:       YELL 0.77 |        RED 0.88 |        RED 0.88 |       BLUE 0.81 |       WHIT 0.70 |       GREE 0.81 |       WHIT 0.66 |        RED 0.84
+  row 3:        RED 0.88 |        RED 0.88 |       WHIT 0.72 |       ORAN 0.78 |        RED 0.86 |       YELL 0.73 |       GREE 0.80 |       WHIT 0.64
+  row 4:       WHIT 0.75 |       GREE 0.86 |       GREE 0.85 |       ORAN 0.54 |    Y_flame 0.63 |       ORAN 0.75 |       WHIT 0.66 |       GREE 0.79
+  row 5:       ORAN 0.82 |       PURP 0.80 |       ORAN 0.81 |       YELL 0.50 |        RED 0.53 |       GREE 0.82 |       BLUE 0.77 |       WHIT 0.64
+  row 6:       PURP 0.79 |       GREE 0.85 |       ORAN 0.81 |       GREE 0.84 |       PURP 0.75 |       BLUE 0.78 |       YELL 0.70 |        RED 0.84
+  row 7:       WHIT 0.77 |       BLUE 0.85 |       WHIT 0.75 |       YELL 0.77 |       YELL 0.75 |       PURP 0.73 |       GREE 0.81 |       YELL 0.69
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue                :  4
+  green               : 11
+  orange              :  8
+  purple              :  6
+  red                 : 10
+  white               : 14
+  yellow              : 10
+  yellow_flame        :  1
+
+[AI] Selected move: (5,2) <-> (5,3)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (5,2) -> (5,3)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+  [Hand] Match 30 | Cards: [o,b,o,r_h,o] | Current: three_of_a_kind (10000 pts) | Next eval in 0 moves
+  [Hand] ** HAND COMPLETE ** three_of_a_kind = 10000 pts | Stack: [o,b,o,r_h,o]
+[BOT] Elapsed: 59.3s (no limit)
+[DEBUG] Using saved board calibration
+
+Detailed board state (gem_type confidence):
+  --------------------------------------------------------------------------------
+  row 0:    Y_flame 0.66 |    Y_flame 0.54 |    Y_flame 0.53 |    Y_flame 0.58 |    O_flame 0.71 |    O_flame 0.76 |    O_flame 0.76 |       ORAN 0.52
+  row 1:    R_flame 0.70 |    R_flame 0.69 |    O_flame 0.64 |    O_flame 0.65 |    O_flame 0.65 |    O_flame 0.65 |    O_flame 0.69 |        RED 0.54
+  row 2:    Y_flame 0.59 |    Y_flame 0.58 |    Y_flame 0.59 |    Y_flame 0.58 |    Y_flame 0.59 |    Y_flame 0.58 |    O_flame 0.61 |        RED 0.54
+  row 3:    Y_flame 0.60 |    Y_flame 0.61 |    R_flame 0.67 |    Y_flame 0.62 |    Y_flame 0.61 |    Y_flame 0.61 |    O_flame 0.64 |    P_flame 0.50
+  row 4:       ORAN 0.56 |       ORAN 0.56 |    R_flame 0.57 |       ORAN 0.56 |       ORAN 0.57 |       ORAN 0.57 |    O_flame 0.62 |    G_flame 0.46
+  row 5:    R_flame 0.47 |        RED 0.47 |        RED 0.55 |        RED 0.55 |        RED 0.55 |        RED 0.55 |        RED 0.53 |    P_flame 0.50
+  row 6:     B_star 0.42 |        RED 0.35 |        RED 0.58 |        RED 0.58 |        RED 0.58 |        RED 0.58 |        RED 0.54 |        RED 0.54
+  row 7:        RED 0.46 |        RED 0.46 |        RED 0.46 |        RED 0.47 |        RED 0.47 |        RED 0.47 |        RED 0.44 |       ORAN 0.49
+  --------------------------------------------------------------------------------
+Gem counts by type:
+  blue_star           :  1
+  green_flame         :  1
+  orange              :  7
+  orange_flame        : 11
+  purple_flame        :  2
+  red                 : 22
+  red_flame           :  5
+  yellow_flame        : 15
+
+[BOT] Stop requested via Q hotkey
+[AI] Selected move: (1,2) <-> (2,2)
+[BOT] Board coverage: 100.0%
+[BOT] Executing move: (1,2) -> (2,2)
+[DEBUG] Using saved board calibration
+[DEBUG] Using saved board calibration
+[BOT] Move ((1, 2), (2, 2)) did not change the board — invalid, skipping
+[BOT] Game iteration failed, retrying...
+
+============================================================
+BOT SESSION ENDED
+Total moves: 30
+============================================================
+
+
+**result stat**
+score 30450
+best hand:1500
+number of hands:5
+skulls busted:0
+skull coin flips:1
+
+pair 3
+two pair 1
+full house 1
+

@@ -7,7 +7,6 @@ import numpy as np
 from vision import BoardDetector
 from game_logic import GameLogic
 from ai_player import AIPlayer
-from debug import BoardVisualizer
 import sys
 
 
@@ -28,7 +27,7 @@ def test_vision():
         print("[PASS] Board captured successfully")
         print(f"Board shape: {board.shape}")
         print("Board state:")
-        BoardVisualizer.print_board(board)
+        print(board)
         return True
     
     except Exception as e:
@@ -58,7 +57,7 @@ def test_game_logic():
         ], dtype=np.int8)
         
         print("Test board:")
-        BoardVisualizer.print_board(board)
+        print(board)
         
         logic = GameLogic(board)
         
@@ -91,11 +90,11 @@ def test_game_logic():
         ], dtype=np.int8)
         
         print("Board before cascade:")
-        BoardVisualizer.print_board(test_board)
+        print(test_board)
         
         final_board, score = logic.simulate_cascade(test_board)
         print(f"\nBoard after cascade (score: {score}):")
-        BoardVisualizer.print_board(final_board)
+        print(final_board)
         
         print("[PASS] Game logic tests passed")
         return True
@@ -127,7 +126,7 @@ def test_ai():
         ], dtype=np.int8)
         
         print("Test board:")
-        BoardVisualizer.print_board(board)
+        print(board)
         
         ai = AIPlayer(board)
         move = ai.select_best_move(board)

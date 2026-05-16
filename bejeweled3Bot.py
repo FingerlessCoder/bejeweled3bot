@@ -8,10 +8,11 @@ from ctypes import wintypes
 import pyautogui
 import time
 import threading
+import config as cfg
 from vision import BoardDetector
 from ai_player import AIPlayer
 from debug import BotLogger, BoardVisualizer
-from config import MOVE_DELAY, DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, HYPERCUBE_GEM_ID
+from config import MOVE_DELAY, DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, HYPERCUBE_GEM_ID, STAR_GEM_OFFSET
 from config import MIN_CELL_CONFIDENCE
 
 # ADDED: Remove default pyautogui pause to speed up hardware execution
@@ -32,7 +33,12 @@ class BejewelBot:
 
     def __init__(self):
         self.detector = BoardDetector()
-        self.ai_player = AIPlayer()
+        # Load appropriate AI player based on game mode
+        if cfg.GAME_MODE == "poker":
+            from poker_ai_player import PokerAIPlayer
+            self.ai_player = PokerAIPlayer()
+        else:
+            self.ai_player = AIPlayer()
         self.logger = BotLogger() if LOG_MOVES else None
         self.move_count = 0
         self.last_move_time = 0
@@ -45,6 +51,7 @@ class BejewelBot:
         self.repeat_count = 0
         self.last_board_signature = None
         self.board_move_blacklist = {}
+        self._global_blacklist = {}  # move -> remaining turns to skip
 
     def _board_signature(self, board) -> bytes:
         """Create a compact signature for the current board state."""
@@ -170,47 +177,90 @@ class BejewelBot:
     def _wait_for_board_stable(self, max_wait: float = 12.0) -> bool:
         """
         Poll until the board region pixels stabilise (cascades done).
-        Uses a fast screenshot-only diff instead of the full vision pipeline.
+        Uses bbox capture (only board region, not full screen) for speed.
         Returns True if stable, False if timed out.
         """
         import numpy as np
         from PIL import ImageGrab
-        import cv2
 
         stable_count = 0
-        required_stable = 2
+        required_stable = 6
         prev_region = None
         deadline = time.time() + max_wait
 
+        region = self.detector.board_region
+        if region is None:
+            return False
+
+        rx, ry, rw, rh = (int(x) for x in region)
+        if rw <= 0 or rh <= 0:
+            return False
+        # Shrink for faster diff
+        small_w, small_h = max(1, rw // 4), max(1, rh // 4)
+
         while time.time() < deadline:
-            full = np.array(ImageGrab.grab())
-            bgr = cv2.cvtColor(full, cv2.COLOR_RGB2BGR)
-
-            region = self.detector.board_region
-            if region is None:
-                time.sleep(0.08)
-                continue
-
-            rx, ry, rw, rh = region
-            if rw <= 0 or rh <= 0:
-                time.sleep(0.08)
-                continue
-
-            crop = bgr[ry:ry + int(rh), rx:rx + int(rw)]
+            # Grab only the board region — vastly faster than full screen
+            pil = ImageGrab.grab(bbox=(rx, ry, rx + rw, ry + rh))
+            crop = np.array(pil.convert("L"))  # single-channel grayscale
+            small = crop[::4, ::4]  # 1/4 scale, no interpolation needed
 
             if prev_region is not None:
-                diff = np.mean(np.abs(crop.astype(np.int16) - prev_region.astype(np.int16)))
-                if diff < 5.0:
+                diff = np.mean(np.abs(small.astype(np.int16) - prev_region.astype(np.int16)))
+                if diff < 3.0:
                     stable_count += 1
                     if stable_count >= required_stable:
                         return True
                 else:
                     stable_count = 0
 
-            prev_region = crop
-            time.sleep(0.08)
+            prev_region = small
+            time.sleep(0.05)
 
         print("[BOT] Board stability timeout — proceeding anyway")
+        return False
+
+    def _wait_for_board_detectable(self, max_wait: float = 18.0) -> bool:
+        """
+        Wait until get_board_state() returns a valid, recognizable board.
+
+        Handles two poker-mode scenarios where the board region is visible
+        but doesn't contain normal gems:
+          1. Hand evaluation animation — plays after every 5th match (~3-5s)
+          2. Skull coin flip — board goes dark unpredictably (~3-5s)
+
+        Normal (non-poker) moves return immediately on first check since
+        the board is already detectable after cascade settling.
+
+        Returns True if board became detectable, False if timed out.
+        """
+        import numpy as np
+
+        deadline = time.time() + max_wait
+        last_report = 0.0
+        attempt = 0
+
+        while time.time() < deadline:
+            attempt += 1
+
+            board = self.detector.get_board_state()
+            if board is not None and board.shape == (BOARD_HEIGHT, BOARD_WIDTH):
+                # Require at least 50 % coverage to consider the board "detectable"
+                valid_ratio = float(np.sum(board >= 0)) / float(board.size)
+                if valid_ratio >= 0.50:
+                    if attempt > 1:
+                        elapsed = time.time() - (deadline - max_wait)
+                        print(f"[BOT] Board became detectable after {elapsed:.1f}s")
+                    return True
+
+            elapsed = time.time() - (deadline - max_wait)
+            if elapsed - last_report >= 3.0:
+                remaining = deadline - time.time()
+                print(f"[BOT] Board not detectable — waiting ({elapsed:.0f}s / {max_wait:.0f}s)...")
+                last_report = elapsed
+
+            time.sleep(0.5)
+
+        print(f"[BOT] Board detectability timeout ({max_wait:.0f}s) — proceeding anyway")
         return False
 
     def _game_iteration(self) -> bool:
@@ -231,6 +281,15 @@ class BejewelBot:
 
         board_signature = self._board_signature(board)
 
+        # Debug: print board state for visual validation
+        if DEBUG_MODE:
+            from debug import BoardVisualizer
+            BoardVisualizer.print_board_detailed(
+                board,
+                self.detector.last_confidences,
+                self.detector.gem_type_map,
+            )
+
         # If the board is identical to the previous frame, the last move likely
         # failed to progress the board. Blacklist it so we try a different move.
         if self.last_board_signature == board_signature and self.last_move is not None:
@@ -250,21 +309,30 @@ class BejewelBot:
 
         blacklist = self.board_move_blacklist.setdefault(board_signature, set())
 
-        # Cells containing flame/star gems should not be swapped.
-        # Hypercube (gem ID 21) is ALLOWED — it's a high-value move.
+        # Only skip flame gems (7..13) in non-poker modes.
+        # Poker mode has no special gems — vision might misclassify normal gems as flame,
+        # which would incorrectly block every move involving that cell.
         special_gem_ids = set()
-        if self.detector.normal_gem_count:
+        if cfg.GAME_MODE != "poker":
             for r in range(BOARD_HEIGHT):
                 for c in range(BOARD_WIDTH):
                     gid = board[r, c]
-                    if gid >= self.detector.normal_gem_count and gid != HYPERCUBE_GEM_ID:
+                    if self.detector.normal_gem_count <= gid < STAR_GEM_OFFSET:
                         special_gem_ids.add((r, c))
 
-        # Anti-loop detection: if the same move repeats 3+ times, skip it
+        # Decay global blacklist ticks
+        expired = [m for m, t in self._global_blacklist.items() if t <= 0]
+        for m in expired:
+            del self._global_blacklist[m]
+        self._global_blacklist = {m: t - 1 for m, t in self._global_blacklist.items() if t > 0}
+
         move = None
         selected_score = None
         for candidate_move, score in ranked_moves:
             if candidate_move in blacklist:
+                continue
+            if candidate_move in self._global_blacklist:
+                print(f"[BOT] Globally blacklisted {candidate_move}, skipping")
                 continue
             # Skip moves that touch low-confidence cells (possible special/effects)
             try:
@@ -302,7 +370,10 @@ class BejewelBot:
             move = candidate_move
             selected_score = score
             (r1, c1), (r2, c2) = move
-            print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {score}")
+            if cfg.GAME_MODE == "poker":
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})")
+            else:
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {score}")
             break
 
         if move is None:
@@ -314,36 +385,70 @@ class BejewelBot:
             move = fallback_move
             selected_score = fallback_score
             (r1, c1), (r2, c2) = move
-            print(
-                f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {selected_score}"
-            )
+            if cfg.GAME_MODE == "poker":
+                print(
+                    f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})"
+                )
+            else:
+                print(
+                    f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {selected_score}"
+                )
 
         # Track this move
         self.last_move = move
+
+        # Globally blacklist this move for 3 turns to force exploration
+        # (skipped in poker mode — the AI needs freedom to chain same-color moves)
+        if cfg.GAME_MODE != "poker":
+            self._global_blacklist[move] = 3
 
         # 3. Debug output
         if DEBUG_MODE:
             coverage = self.detector.last_coverage * 100.0
             print(f"[BOT] Board coverage: {coverage:.1f}%")
 
-        # 4. Execute move
+        # 4. Save board state before executing (for later change detection)
+        board_before = board.copy()
+        board_before_sig = board_signature
+
+        # 5. Execute move
         success = self._execute_move(move)
         if not success:
             print("[BOT] Failed to execute move")
             return False
 
-        # 5. Log move
+        # 6. Wait for cascades to settle before the next iteration when enabled.
+        if cfg.WAIT_FOR_BOARD_STABLE:
+            self._wait_for_board_stable()
+
+        # 7. Poker mode: handle hand evaluation animation (every 5 matches ~3-5s)
+        #    and skull coin flip (board goes dark unpredictably).
+        #    _wait_for_board_detectable returns immediately on normal moves
+        #    since the board is already detectable.
+        if cfg.GAME_MODE == "poker":
+            self._wait_for_board_detectable(max_wait=18.0)
+
+        # 8. Verify the board actually changed — if not, the move was invalid.
+        board_after = self.detector.get_board_state()
+        if board_after is not None:
+            if self._board_signature(board_after) == board_before_sig:
+                print(f"[BOT] Move {move} did not change the board — invalid, skipping")
+                blacklist.add(move)
+                return False
+
+        # 9. Hand tracking (only after confirmed successful move)
+        if cfg.GAME_MODE == "poker":
+            self.ai_player.track_move(board_before, move)
+
+        # 10. Log move
         self.move_count += 1
         if self.logger:
             self.logger.log_move(
                 self.move_count,
                 move,
                 selected_score if selected_score is not None else 0,
-                board,
+                board_before,
             )
-
-        # 6. Wait for cascades to settle before the next iteration
-        self._wait_for_board_stable()
 
         return True
 
@@ -378,6 +483,14 @@ class BejewelBot:
             pyautogui.dragTo(x2, y2, duration=0.05, button="left")
 
             time.sleep(0.1)  # Brief pause for swap to register; cascade wait is in _game_iteration
+
+            # Move cursor off the board region so it doesn't obstruct the
+            # subsequent screenshot / board detection.
+            # Position: just above the board's top edge, horizontally centred.
+            # Avoid screen corners (PyAutoGUI fail-safe triggers there).
+            cursor_off_x = x + w // 2
+            cursor_off_y = max(1, y - 30)
+            pyautogui.moveTo(cursor_off_x, cursor_off_y, duration=0.0)
             return True
 
         except Exception as e:
@@ -385,21 +498,10 @@ class BejewelBot:
             return False
 
     def _end_session(self):
-        """End bot session and print stats."""
+        """End bot session."""
         print("\n" + "=" * 60)
         print("BOT SESSION ENDED")
-        print("=" * 60)
-
-        stats = self.ai_player.get_move_stats()
-        print(f"Total moves: {stats.get('total_moves', 0)}")
-        print(f"Average score per move: {stats.get('avg_score', 0):.1f}")
-        print(f"Total score: {stats.get('total_score', 0)}")
-
-        if self.logger:
-            self.logger.log_game_end(
-                stats.get("total_moves", 0), stats.get("total_score", 0), stats
-            )
-
+        print(f"Total moves: {self.move_count}")
         print("=" * 60)
 
     def step_mode(self):
@@ -461,8 +563,13 @@ class BejewelBot:
 
 def _select_game_mode() -> str:
     """Prompt user to pick game mode and update config."""
-    gm = input("Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm/Butterfly): ").strip()
-    selected = "lightning" if gm == "2" else "classic"
+    gm = input("Select game mode (1=Classic/Zen, 2=Lightning/Ice Storm/Butterfly, 3=Poker): ").strip()
+    if gm == "2":
+        selected = "lightning"
+    elif gm == "3":
+        selected = "poker"
+    else:
+        selected = "classic"
     import config as cfg
 
     cfg.GAME_MODE = selected
@@ -510,7 +617,11 @@ def main():
         board = bot.detector.get_board_state()
         if board is not None:
             print("[TEST] Board detected successfully!")
-            BoardVisualizer.print_board(board)
+            BoardVisualizer.print_board_detailed(
+                board,
+                bot.detector.last_confidences,
+                bot.detector.gem_type_map,
+            )
         else:
             print("[TEST] Failed to detect board")
 

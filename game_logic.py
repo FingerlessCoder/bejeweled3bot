@@ -8,7 +8,7 @@ from typing import List, Tuple, Set
 from config import (
     BOARD_WIDTH, BOARD_HEIGHT, MIN_MATCH_LENGTH,
     MAX_CASCADE_DEPTH, CASCADE_DEPTH_BONUS, IMMEDIATE_MATCH_WEIGHT,
-    NORMAL_GEM_COUNT, HYPERCUBE_GEM_ID
+    NORMAL_GEM_COUNT, HYPERCUBE_GEM_ID, STAR_GEM_OFFSET
 )
 
 
@@ -56,16 +56,45 @@ class GameLogic:
     def _is_hypercube(self, gem_id: int) -> bool:
         return gem_id == HYPERCUBE_GEM_ID
 
+    def _is_star_gem(self, gem_id: int) -> bool:
+        return STAR_GEM_OFFSET <= gem_id < HYPERCUBE_GEM_ID
+
+    def _star_base_color(self, star_id: int) -> int:
+        """Return the normal gem ID (0..6) that this star matches with."""
+        return star_id - STAR_GEM_OFFSET
+
+    def _is_star_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> bool:
+        """Check if a move activates a star gem (star + same-color normal gem)."""
+        (r1, c1), (r2, c2) = move
+        if self.board is None:
+            return False
+        g1 = self.board[r1, c1]
+        g2 = self.board[r2, c2]
+        if self._is_star_gem(g1):
+            return g2 == self._star_base_color(g1)
+        if self._is_star_gem(g2):
+            return g1 == self._star_base_color(g2)
+        return False
+
     def _is_valid_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> bool:
-        """Check if a move creates at least one match (or involves a hypercube)."""
+        """Check if a move creates at least one match (or involves hypercube/star)."""
         (r1, c1), (r2, c2) = move
 
-        # Hypercube swaps are always valid
         if self.board is not None:
             g1 = self.board[r1, c1] if r1 < self.board.shape[0] and c1 < self.board.shape[1] else -1
             g2 = self.board[r2, c2] if r2 < self.board.shape[0] and c2 < self.board.shape[1] else -1
+
+            # Hypercube swaps are always valid
             if self._is_hypercube(g1) or self._is_hypercube(g2):
                 return True
+
+            # Star + same-color gem is always valid
+            if self._is_star_move(move):
+                return True
+
+            # Swapping two identical gems is a board no-op — can never create new matches
+            if g1 == g2:
+                return False
 
         # Make a copy and perform the swap
         test_board = self.board.copy()
@@ -120,6 +149,50 @@ class GameLogic:
         
         return list(matched)
     
+    def _analyze_match_shape(self, matches: List[Tuple[int, int]]) -> str:
+        """Determine what special gem a match shape would create.
+
+        Returns 'flame', 'star', 'hypercube', or ''.
+        """
+        if len(matches) < 4:
+            return ''
+
+        rows = set(r for r, c in matches)
+        cols = set(c for r, c in matches)
+
+        # All in one row → horizontal chain
+        if len(rows) == 1:
+            count = len(cols)
+            if count >= 5:
+                return 'hypercube'
+            if count >= 4:
+                return 'flame'
+            return ''
+
+        # All in one column → vertical chain
+        if len(cols) == 1:
+            count = len(rows)
+            if count >= 5:
+                return 'hypercube'
+            if count >= 4:
+                return 'flame'
+            return ''
+
+        # Multiple rows AND columns → L, T, or cross = star
+        # Verify it's actually a connected cross shape and not scattered
+        if len(rows) >= 2 and len(cols) >= 2 and len(matches) >= 4:
+            # Check for a pivot cell that has both horizontal and vertical arms
+            for r, c in matches:
+                h_count = sum(1 for rr, cc in matches if rr == r)
+                v_count = sum(1 for rr, cc in matches if cc == c)
+                if h_count >= 3 and v_count >= 2:
+                    return 'star'
+            # Also check: does this form a 2×2+ block (close enough to L/T)
+            if len(matches) >= 4:
+                return 'star'
+
+        return ''
+
     def simulate_cascade(self, board: np.ndarray = None, depth: int = 0) -> Tuple[np.ndarray, int]:
         """
         Simulate gravity and cascading matches until no more matches exist.
@@ -202,6 +275,37 @@ class GameLogic:
             board_wipe_score = count_cleared * IMMEDIATE_MATCH_WEIGHT * 10
             return board_wipe_score + cascade_score + (r1 + r2) * 2, final_board
 
+        # Star gem move: star + same-colour gem = clear entire row & column
+        if self._is_star_move(move):
+            # Identify the star position and the target position
+            if self._is_star_gem(g1):
+                star_r, star_c = r1, c1
+                target_r, target_c = r2, c2
+            else:
+                star_r, star_c = r2, c2
+                target_r, target_c = r1, c1
+
+            test_board = self.board.copy()
+            test_board[star_r, star_c] = -1
+            test_board[target_r, target_c] = -1
+
+            # Clear the target's entire row
+            for c in range(BOARD_WIDTH):
+                if test_board[target_r, c] >= 0:
+                    test_board[target_r, c] = -1
+            # Clear the target's entire column
+            for r in range(BOARD_HEIGHT):
+                if test_board[r, target_c] >= 0:
+                    test_board[r, target_c] = -1
+
+            # Count cleared gems for score
+            cleared = int(np.sum(test_board < 0)) - (0 if star_r == target_r and star_c == target_c else 0)
+
+            test_board = self._apply_gravity(test_board)
+            final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
+            star_score = cleared * IMMEDIATE_MATCH_WEIGHT * 5
+            return star_score + cascade_score + (r1 + r2) * 2, final_board
+
         # Normal move
         test_board = self.board.copy()
         test_board[r1, c1], test_board[r2, c2] = test_board[r2, c2], test_board[r1, c1]
@@ -209,12 +313,22 @@ class GameLogic:
         matches = self._find_all_matches(test_board)
         immediate_score = len(matches) * IMMEDIATE_MATCH_WEIGHT
 
+        # Bonus for creating special gems (4+, L, T, 5 shapes)
+        shape = self._analyze_match_shape(matches)
+        shape_bonus = 0
+        if shape == 'hypercube':
+            shape_bonus = IMMEDIATE_MATCH_WEIGHT * 50
+        elif shape == 'star':
+            shape_bonus = IMMEDIATE_MATCH_WEIGHT * 30
+        elif shape == 'flame':
+            shape_bonus = IMMEDIATE_MATCH_WEIGHT * 15
+
         for row, col in matches:
             test_board[row, col] = -1
 
         final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
         row_bonus = (r1 + r2) * 2
-        return immediate_score + cascade_score + row_bonus, final_board
+        return immediate_score + cascade_score + row_bonus + shape_bonus, final_board
 
     def evaluate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
         """Evaluate the quality of a move. Returns total score."""

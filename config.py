@@ -26,8 +26,12 @@ GEM_COLORS = {
 GAME_RESOLUTION = "644x510"  # ← CHANGE THIS to match your game window!
 
 # Game mode used for calibration/profile routing.
-# Supported: "classic", "zen", "lightning"
+# Supported: "classic", "zen", "lightning", "poker"
 GAME_MODE = "classic"
+
+# Whether the bot should wait for board cascades to settle after each move.
+# Set to False to skip the wait entirely.
+WAIT_FOR_BOARD_STABLE = True
 
 GAME_WINDOW_TITLE = "Bejeweled"
 
@@ -78,6 +82,8 @@ MOVE_DELAY = 200  # Delay after executing a move
 
 # Gem type ID boundaries (matches vision.py's deterministic mapping)
 NORMAL_GEM_COUNT = 7
+FLAME_GEM_COUNT = 7   # flame gems span ids 7..13
+STAR_GEM_OFFSET = 14  # star gems start at id 14
 HYPERCUBE_GEM_ID = 21
 
 # Match detection

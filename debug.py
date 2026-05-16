@@ -54,62 +54,46 @@ class BotLogger:
 class BoardVisualizer:
     """Converts board state to human-readable format."""
 
-    GEM_SYMBOLS = {
-        -1: ".",
-        0: "R",
-        1: "O",
-        2: "Y",
-        3: "G",
-        4: "B",
-        5: "P",
-        6: "W",
-    }
-
     @staticmethod
-    def board_to_string(board: np.ndarray) -> str:
-        """Convert board to ASCII visualization."""
-        if board is None:
-            return "Board not initialized"
+    def print_board_detailed(board: np.ndarray, confidences: np.ndarray, gem_type_map: dict):
+        """Print board with full gem type name and confidence per cell.
 
-        gem_names = {
-            0: "R",
-            1: "O",
-            2: "Y",
-            3: "G",
-            4: "B",
-            5: "P",
-            6: "W",
-            7: "f",
-            8: "f",
-            9: "f",
-            10: "f",
-            11: "f",
-            12: "f",
-            13: "f",
-            14: "s",
-            15: "s",
-            16: "s",
-            17: "s",
-            18: "s",
-            19: "s",
-            20: "s",
-            21: "H",
-        }
+        Args:
+            board: 8x8 int array of gem IDs
+            confidences: 8x8 float array of per-cell confidence
+            gem_type_map: dict mapping gem_type_name -> gem_id (from BoardDetector)
+        """
+        # Build reverse map: gem_id -> gem_type_name
+        id_to_name = {v: k for k, v in gem_type_map.items()}
 
-        lines = []
-        lines.append("  0 1 2 3 4 5 6 7")
-
-        for row in range(len(board)):
-            line = f"{row} "
-            for col in range(len(board[0])):
+        print()
+        print("Detailed board state (gem_type confidence):")
+        print("  " + "-" * 80)
+        for row in range(board.shape[0]):
+            cells = []
+            for col in range(board.shape[1]):
                 gem_id = board[row, col]
-                symbol = gem_names.get(gem_id, "?")
-                line += symbol + " "
-            lines.append(line)
+                name = id_to_name.get(gem_id, "unknown")
+                conf = confidences[row, col]
+                # Abbreviate: e.g. "red_flame" -> "R_flame", "blue_star" -> "B_star"
+                if "_" in name:
+                    prefix, suffix = name.split("_", 1)
+                    abbr = prefix[0].upper() + "_" + suffix
+                else:
+                    abbr = name[:4].upper() if name != "unknown" else "?"
+                cells.append(f"{abbr:>10s} {conf:.2f}")
+            print(f"  row {row}: " + " | ".join(cells))
+        print("  " + "-" * 80)
 
-        return "\n".join(lines)
-
-    @staticmethod
-    def print_board(board: np.ndarray):
-        """Print board visualization to console."""
-        print(BoardVisualizer.board_to_string(board))
+        # Summary counts
+        print("Gem counts by type:")
+        counts = {}
+        for row in range(board.shape[0]):
+            for col in range(board.shape[1]):
+                gid = board[row, col]
+                name = id_to_name.get(gid, "unknown")
+                counts[name] = counts.get(name, 0) + 1
+        for name in sorted(counts.keys()):
+            count = counts[name]
+            print(f"  {name:20s}: {count:2d}")
+        print()

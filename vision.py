@@ -241,7 +241,8 @@ class BoardDetector:
         return templates
 
     def _load_special_templates(self) -> dict:
-        """Load JPG special gem templates from special_templates/ with auto-generated masks."""
+        """Load JPG special gem templates, resize to standard size, improve masks."""
+        TEMPLATE_SIZE = (64, 64)  # standard matching size, close to actual cell size
         templates = {}
         for filepath in glob.glob(os.path.join(self.special_sample_dir, "*.jpg")):
             basename = os.path.splitext(os.path.basename(filepath))[0]
@@ -255,26 +256,52 @@ class BoardDetector:
                 if image.ndim == 3
                 else cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
             )
-            h, w = bgr.shape[:2]
 
-            border = np.concatenate(
-                [bgr[0, :, :], bgr[-1, :, :], bgr[:, 0, :], bgr[:, -1, :]]
+            # Generate mask via Otsu threshold on grayscale.
+            # This cleanly separates the bright gem from its darker background,
+            # giving ~30–50% mask coverage (vs 75–99% with the old corner-based approach).
+            gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+            _, otsu_mask = cv2.threshold(
+                gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
             )
-            bg_color = np.median(border.astype(np.float32), axis=0)
-            diff = np.abs(bgr.astype(np.int16) - bg_color.astype(np.int16))
-            mask = np.mean(diff, axis=2) > 25
-            if not np.any(mask):
-                mask = np.ones((h, w), dtype=bool)
+            # Clean up: remove speckles, fill small holes
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            cleaned = cv2.morphologyEx(otsu_mask, cv2.MORPH_OPEN, kernel)
+            cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)
+
+            # Keep only the largest connected component (the gem body)
+            num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+                cleaned, connectivity=8
+            )
+            if num_labels > 1:
+                sizes = stats[1:, cv2.CC_STAT_AREA]
+                largest_label = np.argmax(sizes) + 1
+                mask = labels == largest_label
+            else:
+                # Fallback: circular centre region
+                h, w = bgr.shape[:2]
+                cy, cx = h // 2, w // 2
+                Y, X = np.ogrid[:h, :w]
+                radius = min(h, w) * 0.35
+                mask = (X - cx) ** 2 + (Y - cy) ** 2 <= radius ** 2
+
+            # Resize template and mask to standard size
+            resized_bgr = cv2.resize(
+                bgr, TEMPLATE_SIZE, interpolation=cv2.INTER_AREA
+            )
+            resized_mask = cv2.resize(
+                mask.astype(np.uint8), TEMPLATE_SIZE, interpolation=cv2.INTER_NEAREST
+            ) > 0
 
             templates[gem_name] = {
-                "bgr": bgr,
-                "mask": mask,
-                "size": (w, h),
+                "bgr": resized_bgr,
+                "mask": resized_mask,
+                "size": TEMPLATE_SIZE,
             }
 
         if templates:
             print(
-                f"[DEBUG] Loaded {len(templates)} special gem JPG templates from special_templates/"
+                f"[DEBUG] Loaded {len(templates)} special gem templates ({TEMPLATE_SIZE[0]}x{TEMPLATE_SIZE[1]})"
             )
         return templates
 
@@ -295,8 +322,9 @@ class BoardDetector:
             if cell_region.shape[0] < 2 or cell_region.shape[1] < 2:
                 continue
 
+            # INTER_LINEAR produces better quality when upscaling the cell to match template size
             resized_cell = cv2.resize(
-                cell_region, target_size, interpolation=cv2.INTER_AREA
+                cell_region, target_size, interpolation=cv2.INTER_LINEAR
             )
             diff = np.abs(resized_cell.astype(np.int16) - template_bgr.astype(np.int16))
             masked_diff = diff[template_mask]
@@ -319,7 +347,7 @@ class BoardDetector:
                 continue
 
             resized_cell = cv2.resize(
-                cell_region, target_size, interpolation=cv2.INTER_AREA
+                cell_region, target_size, interpolation=cv2.INTER_LINEAR
             )
             diff = np.abs(resized_cell.astype(np.int16) - template_bgr.astype(np.int16))
             masked_diff = diff[template_mask]
@@ -342,6 +370,116 @@ class BoardDetector:
             return "unknown", confidence
 
         return best_match, confidence
+
+    def _classify_by_statistics(self, cell_region: np.ndarray) -> Tuple[str, float]:
+        """Very conservative statistical fallback — hypercube only.
+
+        Analyses the centre 50 % of the cell to avoid edge/background noise.
+        Hypercube's multi-colour swirled pattern gives extremely high
+        per-channel variance and a near-neutral average across the centre,
+        which no normal / flame / star gem matches (they all have a dominant
+        single colour).
+
+        Returns (gem_type_string, confidence) or ("unknown", 0.0).
+        """
+        h, w = cell_region.shape[:2]
+        if h < 8 or w < 8:
+            return "unknown", 0.0
+
+        # Analyse only the centre 50% (hypercube swirl fills the core)
+        cy, cx = h // 2, w // 2
+        crop = cell_region[cy - h // 4 : cy + h // 4, cx - w // 4 : cx + w // 4]
+        if crop.size < 100:
+            return "unknown", 0.0
+
+        b = crop[:, :, 0].astype(np.float32)
+        g = crop[:, :, 1].astype(np.float32)
+        r = crop[:, :, 2].astype(np.float32)
+
+        b_std = float(np.std(b))
+        g_std = float(np.std(g))
+        r_std = float(np.std(r))
+        mean_std = (b_std + g_std + r_std) / 3.0
+
+        if mean_std < 45:
+            return "unknown", 0.0
+
+        b_mean = float(np.mean(b))
+        g_mean = float(np.mean(g))
+        r_mean = float(np.mean(r))
+        mean_brightness = (b_mean + g_mean + r_mean) / 3.0
+
+        # Very dark centre → likely empty space or obstacle
+        if mean_brightness < 50:
+            return "unknown", 0.0
+
+        # Deviation from gray — hypercube centre is near-neutral
+        color_dev = abs(b_mean - mean_brightness) + abs(g_mean - mean_brightness) + abs(r_mean - mean_brightness)
+
+        # === Hypercube === (high variance + near-neutral colour)
+        if mean_std > 65 and color_dev < 55:
+            conf = min(0.90, 0.50 + (mean_std - 65) / 100.0)
+            return "hypercube", conf
+
+        return "unknown", 0.0
+
+    def _classify_flame_by_stats(self, cell_region: np.ndarray) -> Tuple[str, float]:
+        """Conservative flame detection using top/bottom brightness asymmetry.
+
+        Flame gems have a bright animated flame overlay concentrated at the
+        TOP of the cell, which makes the top half distinctly brighter and more
+        yellow than the bottom.  Normal gems have a glossy highlight near the
+        centre but lack this strong top/bottom asymmetry.
+
+        Returns (gem_type_string, confidence) or ("unknown", 0.0).
+        """
+        h, w = cell_region.shape[:2]
+        if h < 8 or w < 8:
+            return "unknown", 0.0
+
+        # Top 25 % vs bottom 25 %
+        top = cell_region[0 : h // 4, :, :].astype(np.float32)
+        bot = cell_region[3 * h // 4 :, :, :].astype(np.float32)
+        if top.size < 50 or bot.size < 50:
+            return "unknown", 0.0
+
+        top_bright = float(np.mean(top))
+        bot_bright = float(np.mean(bot))
+
+        # If bottom is too dark, we're looking at background, not the gem base
+        if bot_bright < 50:
+            return "unknown", 0.0
+
+        # Skip if bottom is actually brighter (definitely not a flame)
+        if top_bright <= bot_bright:
+            return "unknown", 0.0
+
+        ratio = top_bright / max(bot_bright, 1.0)
+
+        # Ratio must be significant — normal gem highlights are not this strong
+        if ratio < 1.20:
+            return "unknown", 0.0
+
+        # The extra brightness on top must have a yellow-ish cast (flame colour)
+        # In BGR: yellow is high G and R, low B.  The flame adds R+G.
+        top_b = float(np.mean(top[:, :, 0]))
+        top_g = float(np.mean(top[:, :, 1]))
+        top_r = float(np.mean(top[:, :, 2]))
+
+        # Yellow flame: R and G dominate over B in the top region
+        if top_r < top_b * 1.1 and top_g < top_b * 1.1:
+            return "unknown", 0.0
+
+        # Classify base colour from the bottom half (unobscured by flame)
+        avg_b_bot = int(np.mean(bot[:, :, 0]))
+        avg_g_bot = int(np.mean(bot[:, :, 1]))
+        avg_r_bot = int(np.mean(bot[:, :, 2]))
+        base_color, base_conf = self._classify_bgr_pixel(avg_b_bot, avg_g_bot, avg_r_bot)
+        if base_conf < 0.35 or base_color == "unknown":
+            return "unknown", 0.0
+
+        confidence = min(0.70, 0.40 + (ratio - 1.20) * 0.8)
+        return f"{base_color}_flame", confidence
 
     def _save_special_sample(self, cell_region: np.ndarray, hint: Optional[str] = None):
         """Save a cropped cell image for later template creation.
@@ -819,13 +957,26 @@ class BoardDetector:
         if cell_region.size == 0:
             return "unknown", 0.0
 
+        # 0. Hypercube pre-check (before template matching — hypercube's multi-colour
+        #    pattern can false-match to star templates at low resolution)
+        hyper_match, hyper_conf = self._classify_by_statistics(cell_region)
+        if hyper_match != "unknown":
+            return hyper_match, hyper_conf
+
+        # 1. Template matching (catches normal gems, star gems, sometimes flame/star)
         template_match, template_confidence = self._classify_cell_by_template(
             cell_region
         )
         if template_match != "unknown":
             return template_match, template_confidence
 
-        # Compute the mean BGR across the cell
+        # 2. Flame-specific fallback (flame animation makes static template matching
+        #    unreliable; top-brightness asymmetry is a robust alternative)
+        flame_match, flame_conf = self._classify_flame_by_stats(cell_region)
+        if flame_match != "unknown":
+            return flame_match, flame_conf
+
+        # 3. Compute the mean BGR across the cell (colour fallback for normal gems)
         avg_b = int(np.mean(cell_region[:, :, 0]))
         avg_g = int(np.mean(cell_region[:, :, 1]))
         avg_r = int(np.mean(cell_region[:, :, 2]))

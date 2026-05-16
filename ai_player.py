@@ -45,6 +45,11 @@ class AIPlayer:
         move_scores.sort(key=lambda x: x[1], reverse=True)
         return move_scores[:top_n]
     
+    def track_move(self, board: np.ndarray,
+                    move: Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
+        """No-op base — only PokerAIPlayer implements hand tracking."""
+        pass
+
     def select_best_move(self, board: np.ndarray) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Analyze board and return the best move.
