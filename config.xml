@@ -1,131 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <bejeweled3bot>
-  <!-- ================================================================== -->
-  <!-- GLOBAL DEFAULTS — apply to all game modes                         -->
-  <!-- Override any value in a &lt;mode&gt; block below to change it per mode. -->
-  <!-- ================================================================== -->
-
-  <!-- Game board dimensions (do not change unless game itself changes) -->
   <board_width>8</board_width>
   <board_height>8</board_height>
-
-  <!-- Your game window resolution → matches RESOLUTION_CONFIGS keys below -->
   <resolution>644x510</resolution>
-
-  <!-- Default game mode: classic | zen | lightning | poker -->
   <mode>classic</mode>
-
   <window_title>Bejeweled</window_title>
-
-  <!-- ======================== TIMING =================================== -->
   <move_delay unit="ms">200</move_delay>
-  <wait_for_board_stable>true</wait_for_board_stable>
+  <wait_for_board_stable>false</wait_for_board_stable>
   <max_cascade_depth>10</max_cascade_depth>
   <cascade_depth_bonus>50</cascade_depth_bonus>
-
-  <!-- ======================== DETECTION ================================ -->
   <board_detection_padding>30</board_detection_padding>
   <min_board_coverage>0.75</min_board_coverage>
   <min_cell_confidence>0.35</min_cell_confidence>
   <min_match_length>3</min_match_length>
   <min_board_pixel_dim>200</min_board_pixel_dim>
   <max_board_aspect_ratio>1.5</max_board_aspect_ratio>
-
-  <!-- Morph kernel sizes: "rows,cols" -->
   <board_morph_kernel_size>5,5</board_morph_kernel_size>
   <template_morph_kernel_size>3,3</template_morph_kernel_size>
-
-  <!-- HSV floor values for board auto-detection -->
   <hsv_min_saturation>100</hsv_min_saturation>
   <hsv_min_value>80</hsv_min_value>
-
-  <!-- ==================== GEM CLASSIFICATION =========================== -->
-  <!-- Template sizes: "width,height" -->
   <gem_template_size>96,96</gem_template_size>
   <special_template_size>64,64</special_template_size>
   <alpha_mask_threshold>10</alpha_mask_threshold>
-
-  <!-- Hypercube detection (high-variance near-neutral centre) -->
   <hypercube_std_min>45</hypercube_std_min>
   <hypercube_std_high>65</hypercube_std_high>
   <hypercube_color_dev_max>55</hypercube_color_dev_max>
   <hypercube_brightness_min>50</hypercube_brightness_min>
   <hypercube_confidence_base>0.50</hypercube_confidence_base>
   <hypercube_confidence_max>0.90</hypercube_confidence_max>
-
-  <!-- Flame detection (top/bottom brightness asymmetry) -->
   <flame_bot_brightness_min>50</flame_bot_brightness_min>
   <flame_ratio_min>1.20</flame_ratio_min>
   <flame_base_conf_min>0.35</flame_base_conf_min>
   <flame_confidence_base>0.40</flame_confidence_base>
   <flame_confidence_max>0.70</flame_confidence_max>
-
-  <!-- BGR nearest-distance fallback -->
   <nearest_distance_max>360</nearest_distance_max>
   <nearest_confidence_min>0.25</nearest_confidence_min>
-
-  <!-- ======================== SCORING ================================== -->
   <immediate_match_weight>10</immediate_match_weight>
-
-  <!-- ======================= FILES & PATHS ============================= -->
   <calibration_file>board_calibration.json</calibration_file>
   <debug_output_dir>debug_output</debug_output_dir>
   <log_file>bot_moves.log</log_file>
-
-  <!-- ======================= GEM COLORS ================================ -->
-  <!-- BGR min/max ranges for each gem type -->
   <gem_colors>
-    <gem name="red"    min="120,0,0"     max="255,150,150"/>
-    <gem name="orange" min="150,80,0"    max="255,200,100"/>
-    <gem name="yellow" min="150,120,0"   max="255,255,100"/>
-    <gem name="green"  min="0,150,0"     max="150,255,150"/>
-    <gem name="blue"   min="0,100,150"   max="150,255,255"/>
-    <gem name="purple" min="80,0,120"    max="255,150,255"/>
-    <gem name="white"  min="180,180,180" max="255,255,255"/>
+    <gem name="red" min="120,0,0" max="255,150,150" />
+    <gem name="orange" min="150,80,0" max="255,200,100" />
+    <gem name="yellow" min="150,120,0" max="255,255,100" />
+    <gem name="green" min="0,150,0" max="150,255,150" />
+    <gem name="blue" min="0,100,150" max="150,255,255" />
+    <gem name="purple" min="80,0,120" max="255,150,255" />
+    <gem name="white" min="180,180,180" max="255,255,255" />
   </gem_colors>
-
-  <!-- ================== RESOLUTION PRESETS ============================= -->
-  <!-- Pre-calibrated board offsets for known window sizes.               -->
-  <!-- Add your resolution here if auto-detect doesn't work well.         -->
   <resolution_presets>
-    <preset name="644x510"  x_offset="100" y_offset="50"  cell_w="60"  cell_h="57"/>
-    <preset name="800x600"  x_offset="85"  y_offset="45"  cell_w="70"  cell_h="70"/>
-    <preset name="1024x768" x_offset="110" y_offset="60"  cell_w="90"  cell_h="90"/>
-    <preset name="1280x960" x_offset="140" y_offset="75"  cell_w="110" cell_h="110"/>
-    <preset name="1920x1200" x_offset="210" y_offset="115" cell_w="170" cell_h="170"/>
+    <preset name="644x510" x_offset="100" y_offset="50" cell_w="60" cell_h="57" />
+    <preset name="800x600" x_offset="85" y_offset="45" cell_w="70" cell_h="70" />
+    <preset name="1024x768" x_offset="110" y_offset="60" cell_w="90" cell_h="90" />
+    <preset name="1280x960" x_offset="140" y_offset="75" cell_w="110" cell_h="110" />
+    <preset name="1920x1200" x_offset="210" y_offset="115" cell_w="170" cell_h="170" />
   </resolution_presets>
-
-  <!-- ================================================================== -->
-  <!-- DEBUG SETTINGS (global defaults)                                   -->
-  <!-- ================================================================== -->
-  <debug_mode>true</debug_mode>
-  <save_debug_screenshots>true</save_debug_screenshots>
+  <debug_mode>false</debug_mode>
+  <save_debug_screenshots>false</save_debug_screenshots>
   <max_debug_screenshots>64</max_debug_screenshots>
   <log_moves>true</log_moves>
-
-  <!-- ================================================================== -->
-  <!-- MODE-SPECIFIC OVERRIDES                                            -->
-  <!-- Values here override the global defaults for that game mode.       -->
-  <!-- Only list the values you want to differ from global defaults.      -->
-  <!-- ================================================================== -->
-
-  <!-- Mode 5: POKER -->
   <mode name="poker">
-    <debug_mode>false</debug_mode>
+    <debug_mode>true</debug_mode>
     <save_debug_screenshots>false</save_debug_screenshots>
     <min_board_coverage>0.50</min_board_coverage>
-    <!-- Uncomment and edit any of these to override for poker mode:
-    <wait_for_board_stable>true</wait_for_board_stable>
-    <log_moves>true</log_moves>
-    <move_delay>250</move_delay>
-    -->
   </mode>
-
-  <!-- Add more mode blocks as needed, e.g.:
-  <mode name="lightning">
-    <move_delay>100</move_delay>
-    <debug_mode>false</debug_mode>
-  </mode>
-  -->
-
 </bejeweled3bot>

@@ -358,6 +358,64 @@ def set_mode(mode_name: str) -> None:
     _apply_config(raw)
 
 
+def save_setting(tag_name: str, value) -> bool:
+    """
+    Persist a single setting to ``config.xml`` so it survives restarts
+    and is picked up by :func:`set_mode` the next time the game mode changes.
+
+    1. Updates (or creates) the root-level ``<tag_name>`` element.
+    2. If the current game mode overrides this tag, also updates the
+       ``<mode>`` block so the override isn't stale.
+
+    The runtime module global is **not** updated by this function — the
+    caller is responsible for that, e.g.::
+
+        cfg.DEBUG_MODE = False
+        cfg.save_setting("debug_mode", cfg.DEBUG_MODE)
+
+    Returns ``True`` on success, ``False`` if the XML file could not be
+    read or written.
+    """
+    path = _xml_path
+    try:
+        tree = ET.parse(path)
+        root = tree.getroot()
+    except (ET.ParseError, FileNotFoundError, OSError):
+        return False
+
+    # Convert Python value to the string form that _parse_value can read back
+    if isinstance(value, bool):
+        text = "true" if value else "false"
+    elif isinstance(value, (int, float)):
+        text = str(value)
+    else:
+        text = str(value)
+
+    # 1. Update or create the root-level element
+    elem = root.find(tag_name)
+    if elem is None:
+        elem = ET.SubElement(root, tag_name)
+    elem.text = text
+
+    # 2. If the current game mode overrides this tag, keep that in sync too
+    current_mode = globals().get("GAME_MODE", str(_DEFAULTS.get("mode", "classic")))
+    for mode_elem in root.findall("mode"):
+        if mode_elem.get("name") == current_mode:
+            override = mode_elem.find(tag_name)
+            if override is not None:
+                override.text = text
+            break
+
+    # Pretty-print (Python 3.9+)
+    try:
+        ET.indent(tree, space="  ")
+    except AttributeError:
+        pass
+
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+    return True
+
+
 # ----- Initial load -----
 _xml_config = _load_config_xml(_xml_path)
 _apply_config(_xml_config)

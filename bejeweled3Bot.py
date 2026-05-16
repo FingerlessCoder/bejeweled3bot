@@ -587,12 +587,15 @@ def _settings_menu():
 
         if choice == "1":
             cfg.DEBUG_MODE = not cfg.DEBUG_MODE
+            cfg.save_setting("debug_mode", cfg.DEBUG_MODE)
             print(f"  -> Debug mode {'ON' if cfg.DEBUG_MODE else 'OFF'}")
         elif choice == "2":
             cfg.SAVE_DEBUG_SCREENSHOTS = not cfg.SAVE_DEBUG_SCREENSHOTS
+            cfg.save_setting("save_debug_screenshots", cfg.SAVE_DEBUG_SCREENSHOTS)
             print(f"  -> Save screenshots {'ON' if cfg.SAVE_DEBUG_SCREENSHOTS else 'OFF'}")
         elif choice == "3":
             cfg.WAIT_FOR_BOARD_STABLE = not cfg.WAIT_FOR_BOARD_STABLE
+            cfg.save_setting("wait_for_board_stable", cfg.WAIT_FOR_BOARD_STABLE)
             print(f"  -> Wait for board stable {'ON' if cfg.WAIT_FOR_BOARD_STABLE else 'OFF'}")
         elif choice in ("q", "quit", ""):
             break
