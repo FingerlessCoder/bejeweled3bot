@@ -107,7 +107,7 @@ class GameLogic:
     def _find_all_matches(self, board: np.ndarray) -> List[Tuple[int, int]]:
         """
         Find all cells that are part of a match.
-        Returns set of (row, col) tuples.
+        Returns list of (row, col) tuples.
         """
         matched = set()
         
@@ -247,73 +247,58 @@ class GameLogic:
         
         return board
     
-    def simulate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[int, np.ndarray]:
-        """Simulate a move and return (total_score, board_after_cascades).
-        Unlike evaluate_move, this also returns the resulting board for lookahead.
-        """
-        if not self._is_valid_move(move):
+    def _simulate_hypercube_move(self, move, r1, c1, r2, c2, g1, g2):
+        """Handle hypercube move: clears all gems of target type."""
+        target_type = g2 if self._is_hypercube(g1) else g1
+        if target_type < 0 or target_type >= NORMAL_GEM_COUNT:
             return 0, self.board.copy()
 
-        (r1, c1), (r2, c2) = move
-        g1 = self.board[r1, c1]
-        g2 = self.board[r2, c2]
+        test_board = self.board.copy()
+        test_board[r1, c1] = -1
+        test_board[r2, c2] = -1
+        count_cleared = int(np.sum(test_board == target_type))
+        test_board[test_board == target_type] = -1
+        count_cleared += 1
+        test_board = self._apply_gravity(test_board)
+        final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
+        board_wipe_score = count_cleared * IMMEDIATE_MATCH_WEIGHT * 10
+        return board_wipe_score + cascade_score + (r1 + r2) * 2, final_board
 
-        # Hypercube move
-        if self._is_hypercube(g1) or self._is_hypercube(g2):
-            target_type = g2 if self._is_hypercube(g1) else g1
-            if target_type < 0 or target_type >= NORMAL_GEM_COUNT:
-                return 0, self.board.copy()
+    def _simulate_star_move(self, move, r1, c1, r2, c2, g1, g2):
+        """Handle star gem move: clears entire row & column of target."""
+        if self._is_star_gem(g1):
+            star_r, star_c = r1, c1
+            target_r, target_c = r2, c2
+        else:
+            star_r, star_c = r2, c2
+            target_r, target_c = r1, c1
 
-            test_board = self.board.copy()
-            test_board[r1, c1] = -1
-            test_board[r2, c2] = -1
-            count_cleared = int(np.sum(test_board == target_type))
-            test_board[test_board == target_type] = -1
-            count_cleared += 1
-            test_board = self._apply_gravity(test_board)
-            final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
-            board_wipe_score = count_cleared * IMMEDIATE_MATCH_WEIGHT * 10
-            return board_wipe_score + cascade_score + (r1 + r2) * 2, final_board
+        test_board = self.board.copy()
+        test_board[star_r, star_c] = -1
+        test_board[target_r, target_c] = -1
 
-        # Star gem move: star + same-colour gem = clear entire row & column
-        if self._is_star_move(move):
-            # Identify the star position and the target position
-            if self._is_star_gem(g1):
-                star_r, star_c = r1, c1
-                target_r, target_c = r2, c2
-            else:
-                star_r, star_c = r2, c2
-                target_r, target_c = r1, c1
+        for c in range(BOARD_WIDTH):
+            if test_board[target_r, c] >= 0:
+                test_board[target_r, c] = -1
+        for r in range(BOARD_HEIGHT):
+            if test_board[r, target_c] >= 0:
+                test_board[r, target_c] = -1
 
-            test_board = self.board.copy()
-            test_board[star_r, star_c] = -1
-            test_board[target_r, target_c] = -1
+        cleared = int(np.sum(test_board < 0)) - (0 if star_r == target_r and star_c == target_c else 0)
 
-            # Clear the target's entire row
-            for c in range(BOARD_WIDTH):
-                if test_board[target_r, c] >= 0:
-                    test_board[target_r, c] = -1
-            # Clear the target's entire column
-            for r in range(BOARD_HEIGHT):
-                if test_board[r, target_c] >= 0:
-                    test_board[r, target_c] = -1
+        test_board = self._apply_gravity(test_board)
+        final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
+        star_score = cleared * IMMEDIATE_MATCH_WEIGHT * 5
+        return star_score + cascade_score + (r1 + r2) * 2, final_board
 
-            # Count cleared gems for score
-            cleared = int(np.sum(test_board < 0)) - (0 if star_r == target_r and star_c == target_c else 0)
-
-            test_board = self._apply_gravity(test_board)
-            final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
-            star_score = cleared * IMMEDIATE_MATCH_WEIGHT * 5
-            return star_score + cascade_score + (r1 + r2) * 2, final_board
-
-        # Normal move
+    def _simulate_normal_move(self, move, r1, c1, r2, c2):
+        """Handle normal gem swap: match-3 detection + cascade."""
         test_board = self.board.copy()
         test_board[r1, c1], test_board[r2, c2] = test_board[r2, c2], test_board[r1, c1]
 
         matches = self._find_all_matches(test_board)
         immediate_score = len(matches) * IMMEDIATE_MATCH_WEIGHT
 
-        # Bonus for creating special gems (4+, L, T, 5 shapes)
         shape = self._analyze_match_shape(matches)
         shape_bonus = 0
         if shape == 'hypercube':
@@ -329,6 +314,25 @@ class GameLogic:
         final_board, cascade_score = self.simulate_cascade(test_board, depth=1)
         row_bonus = (r1 + r2) * 2
         return immediate_score + cascade_score + row_bonus + shape_bonus, final_board
+
+    def simulate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[int, np.ndarray]:
+        """Simulate a move and return (total_score, board_after_cascades).
+        Unlike evaluate_move, this also returns the resulting board for lookahead.
+        """
+        if not self._is_valid_move(move):
+            return 0, self.board.copy()
+
+        (r1, c1), (r2, c2) = move
+        g1 = self.board[r1, c1]
+        g2 = self.board[r2, c2]
+
+        if self._is_hypercube(g1) or self._is_hypercube(g2):
+            return self._simulate_hypercube_move(move, r1, c1, r2, c2, g1, g2)
+
+        if self._is_star_move(move):
+            return self._simulate_star_move(move, r1, c1, r2, c2, g1, g2)
+
+        return self._simulate_normal_move(move, r1, c1, r2, c2)
 
     def evaluate_move(self, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
         """Evaluate the quality of a move. Returns total score."""
@@ -367,16 +371,4 @@ class GameLogic:
 
         return move_potential + near_matches * IMMEDIATE_MATCH_WEIGHT
 
-    def get_gem_type_name(self, gem_id: int) -> str:
-        """Convert gem ID back to name."""
-        id_to_name = {v: k for k, v in {
-            'red': 0, 'orange': 1, 'yellow': 2, 'green': 3,
-            'blue': 4, 'purple': 5, 'pink': 6
-        }.items()}
-        return id_to_name.get(gem_id, 'unknown')
 
-
-def evaluate_move_quality(board: np.ndarray, move: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
-    """Convenience function to evaluate a move."""
-    logic = GameLogic(board)
-    return logic.evaluate_move(move)

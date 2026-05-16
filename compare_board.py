@@ -5,7 +5,6 @@ Capture board state before and after a move to diagnose if game is responding.
 import time
 from vision import BoardDetector
 from config import BOARD_WIDTH, BOARD_HEIGHT
-import pyautogui
 
 def compare_board_states():
     """Capture before/after to see if game updates after a move."""

@@ -29,8 +29,8 @@ class QuickCalibrator:
                 handles.append(hwnd)
         try:
             win32gui.EnumWindows(_collect, None)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Error enumerating windows: {e}")
         return handles[0] if handles else None
 
     def _extract_color(self, x1: int, y1: int, x2: int, y2: int) -> Optional[Tuple[int, int, int]]:
@@ -69,8 +69,8 @@ class QuickCalibrator:
         
         try:
             win32gui.SetForegroundWindow(hwnd)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Could not focus game window: {e}")
         
         time.sleep(1)
         
@@ -80,8 +80,8 @@ class QuickCalibrator:
             try:
                 with open(self.COLOR_REFERENCE_FILE, "r") as f:
                     color_ref = json.load(f)
-            except:
-                pass
+            except Exception as e:
+                print(f"[WARN] Could not load existing color reference: {e}")
         
         gems_to_fix = ['yellow', 'orange']
         

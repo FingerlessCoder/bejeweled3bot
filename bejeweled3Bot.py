@@ -5,6 +5,7 @@ Orchestrates vision, game logic, and AI player.
 
 import ctypes
 from ctypes import wintypes
+import numpy as np
 import pyautogui
 import time
 import threading
@@ -12,7 +13,7 @@ import config as cfg
 from vision import BoardDetector
 from ai_player import AIPlayer
 from debug import BotLogger, BoardVisualizer
-from config import MOVE_DELAY, DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, HYPERCUBE_GEM_ID, STAR_GEM_OFFSET
+from config import DEBUG_MODE, LOG_MOVES, BOARD_WIDTH, BOARD_HEIGHT, STAR_GEM_OFFSET
 from config import MIN_CELL_CONFIDENCE
 
 # ADDED: Remove default pyautogui pause to speed up hardware execution
@@ -105,8 +106,8 @@ class BejewelBot:
             ctypes.windll.user32.PostThreadMessageW(
                 self._hotkey_thread_id, WM_QUIT, 0, 0
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARN] Failed to post quit message to hotkey thread: {e}")
 
     def start(self, duration_seconds: int = 0):
         """
@@ -263,6 +264,87 @@ class BejewelBot:
         print(f"[BOT] Board detectability timeout ({max_wait:.0f}s) — proceeding anyway")
         return False
 
+    def _select_best_move_from_ranked(
+        self, ranked_moves: list, board: np.ndarray, board_signature: bytes
+    ) -> tuple:
+        """
+        Filter ranked moves through blacklist, confidence, and repeat checks.
+        Returns (move, score) or (None, None) if no acceptable move found.
+        """
+        blacklist = self.board_move_blacklist.setdefault(board_signature, set())
+
+        # Only skip flame gems (7..13) in non-poker modes.
+        special_gem_ids = set()
+        if cfg.GAME_MODE != "poker":
+            for r in range(BOARD_HEIGHT):
+                for c in range(BOARD_WIDTH):
+                    gid = board[r, c]
+                    if self.detector.normal_gem_count <= gid < STAR_GEM_OFFSET:
+                        special_gem_ids.add((r, c))
+
+        # Decay global blacklist ticks
+        expired = [m for m, t in self._global_blacklist.items() if t <= 0]
+        for m in expired:
+            del self._global_blacklist[m]
+        self._global_blacklist = {m: t - 1 for m, t in self._global_blacklist.items() if t > 0}
+
+        move = None
+        selected_score = None
+        for candidate_move, score in ranked_moves:
+            if candidate_move in blacklist:
+                continue
+            if candidate_move in self._global_blacklist:
+                print(f"[BOT] Globally blacklisted {candidate_move}, skipping")
+                continue
+            # Skip moves that touch low-confidence cells
+            try:
+                (ra, ca), (rb, cb) = candidate_move
+                conf_a = float(self.detector.last_confidences[ra, ca])
+                conf_b = float(self.detector.last_confidences[rb, cb])
+                if conf_a < MIN_CELL_CONFIDENCE or conf_b < MIN_CELL_CONFIDENCE:
+                    print(f"[BOT] Skipping move {candidate_move} due to low confidence cells ({conf_a:.2f},{conf_b:.2f})")
+                    continue
+            except Exception:
+                pass
+            # Skip moves that involve special gems
+            if special_gem_ids:
+                (ra, ca), (rb, cb) = candidate_move
+                if (ra, ca) in special_gem_ids or (rb, cb) in special_gem_ids:
+                    print(f"[BOT] Skipping move {candidate_move} - involves a special gem")
+                    continue
+            if candidate_move == self.last_move:
+                self.repeat_count += 1
+                if self.repeat_count >= 3:
+                    print(f"[BOT] WARNING: Move {self.last_move} repeated {self.repeat_count} times, skipping to next best")
+                    self.repeat_count = 0
+                    blacklist.add(candidate_move)
+                    continue
+            else:
+                self.repeat_count = 0
+
+            move = candidate_move
+            selected_score = score
+            (r1, c1), (r2, c2) = move
+            if cfg.GAME_MODE == "poker":
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})")
+            else:
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {score}")
+            break
+
+        if move is None:
+            print("[BOT] All top moves were already tried for this board, clearing retry list and re-evaluating")
+            blacklist.clear()
+            fallback_move, fallback_score = ranked_moves[0]
+            move = fallback_move
+            selected_score = fallback_score
+            (r1, c1), (r2, c2) = move
+            if cfg.GAME_MODE == "poker":
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})")
+            else:
+                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {selected_score}")
+
+        return move, selected_score
+
     def _game_iteration(self) -> bool:
         """
         Single iteration of the game loop.
@@ -290,109 +372,24 @@ class BejewelBot:
                 self.detector.gem_type_map,
             )
 
-        # If the board is identical to the previous frame, the last move likely
-        # failed to progress the board. Blacklist it so we try a different move.
+        # If the board is identical to the previous frame, blacklist last move
         if self.last_board_signature == board_signature and self.last_move is not None:
-            blacklist = self.board_move_blacklist.setdefault(board_signature, set())
-            if self.last_move not in blacklist:
-                blacklist.add(self.last_move)
-                print(
-                    f"[BOT] Board did not change after {self.last_move}; skipping that move"
-                )
+            bl = self.board_move_blacklist.setdefault(board_signature, set())
+            if self.last_move not in bl:
+                bl.add(self.last_move)
+                print(f"[BOT] Board did not change after {self.last_move}; skipping that move")
         self.last_board_signature = board_signature
 
-        # 2. AI selects best move(s)
+        # 2. AI selects best move(s) and filter
         ranked_moves = self.ai_player.get_ranked_moves(board, top_n=5)
         if not ranked_moves:
             print("[BOT] No valid moves found")
             return False
 
-        blacklist = self.board_move_blacklist.setdefault(board_signature, set())
-
-        # Only skip flame gems (7..13) in non-poker modes.
-        # Poker mode has no special gems — vision might misclassify normal gems as flame,
-        # which would incorrectly block every move involving that cell.
-        special_gem_ids = set()
-        if cfg.GAME_MODE != "poker":
-            for r in range(BOARD_HEIGHT):
-                for c in range(BOARD_WIDTH):
-                    gid = board[r, c]
-                    if self.detector.normal_gem_count <= gid < STAR_GEM_OFFSET:
-                        special_gem_ids.add((r, c))
-
-        # Decay global blacklist ticks
-        expired = [m for m, t in self._global_blacklist.items() if t <= 0]
-        for m in expired:
-            del self._global_blacklist[m]
-        self._global_blacklist = {m: t - 1 for m, t in self._global_blacklist.items() if t > 0}
-
-        move = None
-        selected_score = None
-        for candidate_move, score in ranked_moves:
-            if candidate_move in blacklist:
-                continue
-            if candidate_move in self._global_blacklist:
-                print(f"[BOT] Globally blacklisted {candidate_move}, skipping")
-                continue
-            # Skip moves that touch low-confidence cells (possible special/effects)
-            try:
-                (ra, ca), (rb, cb) = candidate_move
-                conf_a = float(self.detector.last_confidences[ra, ca])
-                conf_b = float(self.detector.last_confidences[rb, cb])
-                if conf_a < MIN_CELL_CONFIDENCE or conf_b < MIN_CELL_CONFIDENCE:
-                    print(
-                        f"[BOT] Skipping move {candidate_move} due to low confidence cells ({conf_a:.2f},{conf_b:.2f})"
-                    )
-                    continue
-            except Exception:
-                # If confidences unavailable, do not skip
-                pass
-            # Skip moves that involve special gems (flame, star, hypercube)
-            if special_gem_ids:
-                (ra, ca), (rb, cb) = candidate_move
-                if (ra, ca) in special_gem_ids or (rb, cb) in special_gem_ids:
-                    print(
-                        f"[BOT] Skipping move {candidate_move} - involves a special gem"
-                    )
-                    continue
-            if candidate_move == self.last_move:
-                self.repeat_count += 1
-                if self.repeat_count >= 3:
-                    print(
-                        f"[BOT] WARNING: Move {self.last_move} repeated {self.repeat_count} times, skipping to next best"
-                    )
-                    self.repeat_count = 0
-                    blacklist.add(candidate_move)
-                    continue  # Skip this move, try next
-            else:
-                self.repeat_count = 0
-
-            move = candidate_move
-            selected_score = score
-            (r1, c1), (r2, c2) = move
-            if cfg.GAME_MODE == "poker":
-                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})")
-            else:
-                print(f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {score}")
-            break
-
+        move, selected_score = self._select_best_move_from_ranked(ranked_moves, board, board_signature)
         if move is None:
-            print(
-                "[BOT] All top moves were already tried for this board, clearing retry list and re-evaluating"
-            )
-            blacklist.clear()
-            fallback_move, fallback_score = ranked_moves[0]
-            move = fallback_move
-            selected_score = fallback_score
-            (r1, c1), (r2, c2) = move
-            if cfg.GAME_MODE == "poker":
-                print(
-                    f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})"
-                )
-            else:
-                print(
-                    f"[AI] Selected move: ({r1},{c1}) <-> ({r2},{c2}), Score: {selected_score}"
-                )
+            print("[BOT] Could not select an acceptable move")
+            return False
 
         # Track this move
         self.last_move = move
@@ -433,7 +430,7 @@ class BejewelBot:
         if board_after is not None:
             if self._board_signature(board_after) == board_before_sig:
                 print(f"[BOT] Move {move} did not change the board — invalid, skipping")
-                blacklist.add(move)
+                self.board_move_blacklist.setdefault(board_before_sig, set()).add(move)
                 return False
 
         # 9. Hand tracking (only after confirmed successful move)

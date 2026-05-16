@@ -35,8 +35,8 @@ class ColorCalibrator:
                 handles.append(hwnd)
         try:
             win32gui.EnumWindows(_collect, None)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Error enumerating windows: {e}")
         return handles[0] if handles else None
 
     def _extract_color(self, x1: int, y1: int, x2: int, y2: int) -> Optional[Tuple[int, int, int]]:
@@ -83,8 +83,8 @@ class ColorCalibrator:
         
         try:
             win32gui.SetForegroundWindow(hwnd)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Could not focus game window: {e}")
         
         time.sleep(1)
         

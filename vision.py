@@ -25,6 +25,28 @@ from config import (
     MAX_DEBUG_SCREENSHOTS,
     MIN_BOARD_COVERAGE,
     CALIBRATION_FILE,
+    GEM_TEMPLATE_SIZE,
+    SPECIAL_TEMPLATE_SIZE,
+    ALPHA_MASK_THRESHOLD,
+    HYPERCUBE_STD_MIN,
+    HYPERCUBE_STD_HIGH,
+    HYPERCUBE_COLOR_DEV_MAX,
+    HYPERCUBE_BRIGHTNESS_MIN,
+    HYPERCUBE_CONFIDENCE_BASE,
+    HYPERCUBE_CONFIDENCE_MAX,
+    FLAME_BOT_BRIGHTNESS_MIN,
+    FLAME_RATIO_MIN,
+    FLAME_BASE_CONF_MIN,
+    FLAME_CONFIDENCE_BASE,
+    FLAME_CONFIDENCE_MAX,
+    NEAREST_DISTANCE_MAX,
+    NEAREST_CONFIDENCE_MIN,
+    MIN_BOARD_PIXEL_DIM,
+    MAX_BOARD_ASPECT_RATIO,
+    BOARD_MORPH_KERNEL_SIZE,
+    TEMPLATE_MORPH_KERNEL_SIZE,
+    HSV_MIN_SATURATION,
+    HSV_MIN_VALUE,
 )
 import os
 from typing import Tuple, Optional
@@ -102,18 +124,6 @@ class WindowManager:
         except Exception as e:
             print(f"[ERROR] Failed to setup window: {e}")
             return False
-
-    @staticmethod
-    def focus_window():
-        """Bring game window to foreground."""
-        try:
-            hwnd = WindowManager._find_window_handle()
-            if hwnd is not None:
-                win32gui.SetForegroundWindow(hwnd)
-                return True
-        except Exception:
-            pass
-        return False
 
 
 class BoardDetector:
@@ -197,7 +207,7 @@ class BoardDetector:
         template_files = glob.glob(
             os.path.join(os.path.dirname(__file__), "Bejeweled_3_*.webp")
         )
-        template_size = (96, 96)
+        template_size = GEM_TEMPLATE_SIZE
 
         for filepath in template_files:
             basename = os.path.splitext(os.path.basename(filepath))[0]
@@ -209,7 +219,7 @@ class BoardDetector:
                 continue
 
             alpha = image[:, :, 3]
-            mask = alpha > 10
+            mask = alpha > ALPHA_MASK_THRESHOLD
             if not np.any(mask):
                 continue
 
@@ -242,7 +252,7 @@ class BoardDetector:
 
     def _load_special_templates(self) -> dict:
         """Load JPG special gem templates, resize to standard size, improve masks."""
-        TEMPLATE_SIZE = (64, 64)  # standard matching size, close to actual cell size
+        TEMPLATE_SIZE = SPECIAL_TEMPLATE_SIZE
         templates = {}
         for filepath in glob.glob(os.path.join(self.special_sample_dir, "*.jpg")):
             basename = os.path.splitext(os.path.basename(filepath))[0]
@@ -265,7 +275,7 @@ class BoardDetector:
                 gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
             )
             # Clean up: remove speckles, fill small holes
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, TEMPLATE_MORPH_KERNEL_SIZE)
             cleaned = cv2.morphologyEx(otsu_mask, cv2.MORPH_OPEN, kernel)
             cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)
 
@@ -401,7 +411,7 @@ class BoardDetector:
         r_std = float(np.std(r))
         mean_std = (b_std + g_std + r_std) / 3.0
 
-        if mean_std < 45:
+        if mean_std < HYPERCUBE_STD_MIN:
             return "unknown", 0.0
 
         b_mean = float(np.mean(b))
@@ -410,15 +420,15 @@ class BoardDetector:
         mean_brightness = (b_mean + g_mean + r_mean) / 3.0
 
         # Very dark centre → likely empty space or obstacle
-        if mean_brightness < 50:
+        if mean_brightness < HYPERCUBE_BRIGHTNESS_MIN:
             return "unknown", 0.0
 
         # Deviation from gray — hypercube centre is near-neutral
         color_dev = abs(b_mean - mean_brightness) + abs(g_mean - mean_brightness) + abs(r_mean - mean_brightness)
 
         # === Hypercube === (high variance + near-neutral colour)
-        if mean_std > 65 and color_dev < 55:
-            conf = min(0.90, 0.50 + (mean_std - 65) / 100.0)
+        if mean_std > HYPERCUBE_STD_HIGH and color_dev < HYPERCUBE_COLOR_DEV_MAX:
+            conf = min(HYPERCUBE_CONFIDENCE_MAX, HYPERCUBE_CONFIDENCE_BASE + (mean_std - HYPERCUBE_STD_HIGH) / 100.0)
             return "hypercube", conf
 
         return "unknown", 0.0
@@ -447,7 +457,7 @@ class BoardDetector:
         bot_bright = float(np.mean(bot))
 
         # If bottom is too dark, we're looking at background, not the gem base
-        if bot_bright < 50:
+        if bot_bright < FLAME_BOT_BRIGHTNESS_MIN:
             return "unknown", 0.0
 
         # Skip if bottom is actually brighter (definitely not a flame)
@@ -457,7 +467,7 @@ class BoardDetector:
         ratio = top_bright / max(bot_bright, 1.0)
 
         # Ratio must be significant — normal gem highlights are not this strong
-        if ratio < 1.20:
+        if ratio < FLAME_RATIO_MIN:
             return "unknown", 0.0
 
         # The extra brightness on top must have a yellow-ish cast (flame colour)
@@ -475,10 +485,10 @@ class BoardDetector:
         avg_g_bot = int(np.mean(bot[:, :, 1]))
         avg_r_bot = int(np.mean(bot[:, :, 2]))
         base_color, base_conf = self._classify_bgr_pixel(avg_b_bot, avg_g_bot, avg_r_bot)
-        if base_conf < 0.35 or base_color == "unknown":
+        if base_conf < FLAME_BASE_CONF_MIN or base_color == "unknown":
             return "unknown", 0.0
 
-        confidence = min(0.70, 0.40 + (ratio - 1.20) * 0.8)
+        confidence = min(FLAME_CONFIDENCE_MAX, FLAME_CONFIDENCE_BASE + (ratio - FLAME_RATIO_MIN) * 0.8)
         return f"{base_color}_flame", confidence
 
     def _save_special_sample(self, cell_region: np.ndarray, hint: Optional[str] = None):
@@ -552,8 +562,8 @@ class BoardDetector:
 
         # The board gems are highly saturated. Pixels far away from any gem center
         # are usually board chrome or effects, so keep a conservative fallback limit.
-        if nearest_distance <= 360:
-            confidence = max(0.25, 1.0 - (nearest_distance / 360.0))
+        if nearest_distance <= NEAREST_DISTANCE_MAX:
+            confidence = max(NEAREST_CONFIDENCE_MIN, 1.0 - (nearest_distance / NEAREST_DISTANCE_MAX))
             return nearest_match, confidence
 
         return "unknown", 0.0
@@ -668,8 +678,8 @@ class BoardDetector:
                                 "normalized_board_region": normalized_region,
                                 "saved_at": saved_at,
                             }
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[WARN] Failed to merge calibration profile: {e}")
 
         try:
             with open(CALIBRATION_FILE, "w", encoding="utf-8") as handle:
@@ -843,29 +853,29 @@ class BoardDetector:
         mask = np.zeros((hsv.shape[0], hsv.shape[1]), dtype=np.uint8)
 
         # Look for each gem color's hue range with high saturation
-        # Red: 0-10, 170-180
-        red_mask1 = cv2.inRange(hsv, np.array([0, 120, 80]), np.array([10, 255, 255]))
+                # Red: 0-10, 170-180
+        red_mask1 = cv2.inRange(hsv, np.array([0, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([10, 255, 255]))
         red_mask2 = cv2.inRange(
-            hsv, np.array([170, 120, 80]), np.array([180, 255, 255])
+            hsv, np.array([170, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([180, 255, 255])
         )
         red_mask = cv2.bitwise_or(red_mask1, red_mask2)
 
         # Orange/Yellow: 10-40
         orange_mask = cv2.inRange(
-            hsv, np.array([10, 100, 80]), np.array([40, 255, 255])
+            hsv, np.array([10, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([40, 255, 255])
         )
 
         # Green: 40-90
-        green_mask = cv2.inRange(hsv, np.array([40, 100, 80]), np.array([90, 255, 255]))
+        green_mask = cv2.inRange(hsv, np.array([40, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([90, 255, 255]))
 
         # Blue: 100-140
         blue_mask = cv2.inRange(
-            hsv, np.array([100, 100, 80]), np.array([140, 255, 255])
+            hsv, np.array([100, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([140, 255, 255])
         )
 
         # Purple: 140-180
         purple_mask = cv2.inRange(
-            hsv, np.array([140, 100, 80]), np.array([170, 255, 255])
+            hsv, np.array([140, HSV_MIN_SATURATION, HSV_MIN_VALUE]), np.array([170, 255, 255])
         )
 
         # Combine all gem color masks
@@ -875,7 +885,7 @@ class BoardDetector:
         mask = cv2.bitwise_or(mask, purple_mask)
 
         # Apply morphological operations to clean up mask
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, BOARD_MORPH_KERNEL_SIZE)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
@@ -892,12 +902,12 @@ class BoardDetector:
 
         # Filter: board should be roughly square (8x8 gems)
         # Width and height should be similar
-        if w < 200 or h < 200:  # Board should be at least 200x200 pixels
+        if w < MIN_BOARD_PIXEL_DIM or h < MIN_BOARD_PIXEL_DIM:
             print(f"[WARNING] Detected region too small: {w}x{h}")
             return None
 
         aspect_ratio = max(w, h) / min(w, h)
-        if aspect_ratio > 1.5:  # Allow some variation but not too much
+        if aspect_ratio > MAX_BOARD_ASPECT_RATIO:
             print(f"[WARNING] Detected region has bad aspect ratio: {aspect_ratio:.2f}")
             # Don't fail - might still work
 
@@ -911,25 +921,6 @@ class BoardDetector:
         print(f"[DEBUG] Detected board region: x={x}, y={y}, w={w}, h={h}")
 
         return (x, y, w, h)
-
-    def _get_gem_color_rgb(self, img: np.ndarray, x: int, y: int) -> str:
-        """
-        Detect gem color at pixel (x, y) using RGB values.
-
-        Args:
-            img: BGR image (from OpenCV)
-            x, y: Pixel coordinates
-
-        Returns:
-            Color name or 'unknown'
-        """
-        if y < 0 or y >= img.shape[0] or x < 0 or x >= img.shape[1]:
-            return "unknown"
-
-        # OpenCV uses BGR, not RGB
-        b, g, r = img[y, x]
-        gem_type, _confidence = self._classify_bgr_pixel(b, g, r)
-        return gem_type
 
     def _detect_cell_gem(
         self,
@@ -990,6 +981,81 @@ class BoardDetector:
 
         return gem_type, confidence
 
+    def _get_board_region(self, screenshot: np.ndarray) -> Optional[Tuple]:
+        """
+        Determine board region using (in order of preference):
+        1. Saved manual calibration
+        2. Pre-calibrated resolution config
+        3. Auto-detection
+
+        Sets self.board_region, self.cell_width, self.cell_height on success.
+        Returns (board_x, board_y, width, height) or None if no region found.
+        """
+        # 1. Saved manual calibration (survives window resizes)
+        region = self._get_calibrated_board_region()
+        if region is not None:
+            if DEBUG_MODE:
+                print("[DEBUG] Using saved board calibration")
+            board_x_offset, board_y_offset, w, h = region
+            cell_width = w / BOARD_WIDTH
+            cell_height = h / BOARD_HEIGHT
+            self.board_region = region
+            self.cell_width = cell_width
+            self.cell_height = cell_height
+            return region
+
+        # 2. Pre-calibrated coordinates for known resolution
+        if GAME_RESOLUTION in RESOLUTION_CONFIGS:
+            cfg = RESOLUTION_CONFIGS[GAME_RESOLUTION]
+            board_x_offset = cfg["board_x_offset"]
+            board_y_offset = cfg["board_y_offset"]
+            cell_width = cfg["cell_width"]
+            cell_height = cfg["cell_height"]
+
+            print(f"[DEBUG] Using pre-calibrated coords for {GAME_RESOLUTION}")
+            w = BOARD_WIDTH * cell_width
+            h = BOARD_HEIGHT * cell_height
+            region = (board_x_offset, board_y_offset, w, h)
+            self.board_region = region
+            self.cell_width = cell_width
+            self.cell_height = cell_height
+            return region
+
+        # 3. Auto-detect board region
+        print(f"[DEBUG] Resolution '{GAME_RESOLUTION}' not pre-calibrated, auto-detecting...")
+        region = self.find_board_region(screenshot)
+        if region is None:
+            print("[ERROR] Could not find game board in screenshot")
+            return None
+
+        board_x_offset, board_y_offset, w, h = region
+        cell_width = w / BOARD_WIDTH
+        cell_height = h / BOARD_HEIGHT
+        self.board_region = region
+        self.cell_width = cell_width
+        self.cell_height = cell_height
+        return region
+
+    def _scan_board_cells(self, board_img: np.ndarray) -> np.ndarray:
+        """Iterate all cells, classify gems, return 8x8 board array.
+
+        Also populates self.last_confidences and returns the board.
+        """
+        board = np.zeros((BOARD_HEIGHT, BOARD_WIDTH), dtype=np.int8)
+        for row in range(BOARD_HEIGHT):
+            for col in range(BOARD_WIDTH):
+                cell_left = col * self.cell_width
+                cell_top = row * self.cell_height
+                gem_color, conf = self._detect_cell_gem(
+                    board_img, cell_left, cell_top,
+                    self.cell_width, self.cell_height,
+                    row=row, col=col,
+                )
+                gem_id = self.gem_type_map.get(gem_color, -1)
+                board[row, col] = gem_id
+                self.last_confidences[row, col] = float(conf)
+        return board
+
     def get_board_state(self) -> Optional[np.ndarray]:
         """
         Detect board state using either:
@@ -1000,103 +1066,42 @@ class BoardDetector:
         Returns:
             8x8 numpy array of gem type IDs, or None if failed
         """
-        # Capture screenshot
         screenshot = self.capture_screenshot()
         if screenshot is None:
             return None
 
         try:
-            # Prefer a saved calibration because it survives window resizes.
-            region = self._get_calibrated_board_region()
-            if region is not None:
-                if DEBUG_MODE:
-                    print("[DEBUG] Using saved board calibration")
-                board_x_offset, board_y_offset, w, h = region
-                cell_width = w / BOARD_WIDTH
-                cell_height = h / BOARD_HEIGHT
-                self.board_region = region
-            # Check if we have pre-calibrated coordinates for this resolution
-            elif GAME_RESOLUTION in RESOLUTION_CONFIGS:
-                config = RESOLUTION_CONFIGS[GAME_RESOLUTION]
-                board_x_offset = config["board_x_offset"]
-                board_y_offset = config["board_y_offset"]
-                cell_width = config["cell_width"]
-                cell_height = config["cell_height"]
+            # Phase 1: Determine board region
+            region = self._get_board_region(screenshot)
+            if region is None:
+                return None
 
-                print(f"[DEBUG] Using pre-calibrated coords for {GAME_RESOLUTION}")
-                print(f"[DEBUG] Offsets: x={board_x_offset}, y={board_y_offset}")
-                print(f"[DEBUG] Cell size: {cell_width}x{cell_height}")
+            # Phase 2: Extract board image
+            rx, ry, rw, rh = region
+            board_img = screenshot[ry: ry + int(rh), rx: rx + int(rw)]
 
-                # Calculate board region
-                w = BOARD_WIDTH * cell_width
-                h = BOARD_HEIGHT * cell_height
-                region = (board_x_offset, board_y_offset, w, h)
-                self.board_region = region
-            else:
-                # Auto-detect board region
-                print(
-                    f"[DEBUG] Resolution '{GAME_RESOLUTION}' not pre-calibrated, auto-detecting..."
-                )
-                region = self.find_board_region(screenshot)
-                if region is None:
-                    print("[ERROR] Could not find game board in screenshot")
-                    return None
-
-                board_x_offset, board_y_offset, w, h = region
-                cell_width = w / BOARD_WIDTH
-                cell_height = h / BOARD_HEIGHT
-                self.board_region = region
-
-            # Extract board region from screenshot
-            x, y, w, h = self.board_region
-            board_img = screenshot[y : y + int(h), x : x + int(w)]
-
-            self.cell_width = cell_width
-            self.cell_height = cell_height
-
-            # Initialize board
-            board = np.zeros((BOARD_HEIGHT, BOARD_WIDTH), dtype=np.int8)
-            detected_cells = 0
-
-            # Sample several points in each cell and vote on the best gem color.
-            for row in range(BOARD_HEIGHT):
-                for col in range(BOARD_WIDTH):
-                    cell_left = col * cell_width
-                    cell_top = row * cell_height
-                    gem_color, conf = self._detect_cell_gem(
-                        board_img,
-                        cell_left,
-                        cell_top,
-                        cell_width,
-                        cell_height,
-                        row=row,
-                        col=col,
-                    )
-                    gem_id = self.gem_type_map.get(gem_color, -1)
-                    board[row, col] = gem_id
-                    self.last_confidences[row, col] = float(conf)
-                    if gem_id >= 0:
-                        detected_cells += 1
-
+            # Phase 3: Scan all cells to populate board
+            board = self._scan_board_cells(board_img)
+            detected_cells = int(np.sum(board >= 0))
             self.last_board = board
             self.last_coverage = detected_cells / float(BOARD_WIDTH * BOARD_HEIGHT)
 
+            # Phase 4: Coverage check
             if self.last_coverage < MIN_BOARD_COVERAGE:
                 print(
                     f"[WARNING] Low board coverage: {detected_cells}/{BOARD_WIDTH * BOARD_HEIGHT} cells ({self.last_coverage:.1%})"
                 )
                 return None
 
-            # Debug output
+            # Phase 5: Debug
             if DEBUG_MODE:
-                self._save_debug_screenshot(screenshot, self.board_region, board)
+                self._save_debug_screenshot(screenshot, region, board)
 
             return board
 
         except Exception as e:
             print(f"[ERROR] Board detection failed: {e}")
             import traceback
-
             traceback.print_exc()
             return None
 

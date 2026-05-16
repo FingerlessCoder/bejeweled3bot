@@ -14,7 +14,6 @@ This will:
 4. Save debug screenshot
 """
 
-import os
 import sys
 import argparse
 from vision import BoardDetector, WindowManager

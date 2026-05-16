@@ -17,8 +17,7 @@ from collections import Counter
 from typing import Tuple, Optional, List
 from game_logic import GameLogic
 from poker_game_logic import PokerHandDetector
-from config import BOARD_WIDTH, BOARD_HEIGHT, NORMAL_GEM_COUNT, \
-    STAR_GEM_OFFSET, HYPERCUBE_GEM_ID
+from config import NORMAL_GEM_COUNT
 
 
 class PokerAIPlayer:
@@ -95,18 +94,6 @@ class PokerAIPlayer:
             return 'spectrum'
         return 'none'
 
-    def get_hand_progress(self) -> dict:
-        """Return current hand tracking state (for the bot controller)."""
-        current_hand = self._classify_hand(self._cards_colors)
-        return {
-            'cards': list(self._cards_colors),
-            'move_count': self._move_count_in_hand,
-            'pending': 5 - self._move_count_in_hand,
-            'current_hand': current_hand,
-            'hands_completed': self._hands_completed,
-            'total_matches': self._total_matches,
-        }
-
     def _simulate_matched_color(self, board: np.ndarray,
                                 move: Tuple) -> Tuple[Optional[int], bool]:
         """
@@ -115,7 +102,7 @@ class PokerAIPlayer:
         `creates_hypercube` is True when the match shape is 5+ in a row
         (which would create a hypercube special gem in the actual game).
         """
-        norm = self._normalize_board(board)
+        norm = PokerHandDetector._normalize(board)
         self.logic.set_board(norm)
         if not self.logic._is_valid_move(move):
             return None, False
@@ -131,26 +118,6 @@ class PokerAIPlayer:
                 shape = self.logic._analyze_match_shape(matches)
                 return int(gid), (shape == 'hypercube')
         return None, False
-
-    @staticmethod
-    def _normalize_board(board: np.ndarray) -> np.ndarray:
-        """
-        Map special gem IDs to their base colour so GameLogic treats
-        star gems (14-20) as normal gems — this eliminates the huge
-        star-move cascade bonus that otherwise dominates the AI's
-        scoring and makes it stupidly chase star+colour swaps.
-
-        Also used by PokerHandDetector (which has its own normalise),
-        but here we do it *before* GameLogic.simulate_move so that
-        star+same-colour swaps become same-colour (invalid) swaps
-        and aren't even considered as valid moves.
-        """
-        b = board.copy()
-        flame = (b >= NORMAL_GEM_COUNT) & (b < STAR_GEM_OFFSET)
-        b[flame] = b[flame] - NORMAL_GEM_COUNT
-        star = (b >= STAR_GEM_OFFSET) & (b < HYPERCUBE_GEM_ID)
-        b[star] = b[star] - STAR_GEM_OFFSET
-        return b
 
     def _hand_improvement_score(self, matched_color: Optional[int]) -> int:
         """
@@ -193,7 +160,7 @@ class PokerAIPlayer:
         Returns list of (move, total_score) sorted descending.
         """
         # ---- Phase 0: Normalise special gems to base colours ----
-        normalised = self._normalize_board(board)
+        normalised = PokerHandDetector._normalize(board)
         self.logic.set_board(normalised)
         valid_moves = self.logic.find_valid_moves()
         if not valid_moves:
@@ -294,56 +261,4 @@ class PokerAIPlayer:
         self._last_board = board.copy()
         self._last_poker_value = self.detector.evaluate_board_potential(board)
 
-    def select_best_move(self, board: np.ndarray
-                         ) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
-        ranked = self.get_ranked_moves(board, top_n=1)
-        if not ranked:
-            print("[Poker AI] No valid moves available")
-            return None
 
-        best_move, best_score = ranked[0]
-        if best_move:
-            (r1, c1), (r2, c2) = best_move
-            print(f"[Poker AI] Selected move: ({r1},{c1}) <-> ({r2},{c2})")
-            self.move_history.append(best_move)
-
-            self.track_move(board, best_move)
-
-        return best_move
-
-    def get_move_stats(self) -> dict:
-        if not self.score_history:
-            return {'total_moves': 0, 'avg_score': 0, 'total_score': 0,
-                    'hand_counts': {}}
-        hand_counts = {}
-        for hands in self.hand_history:
-            for ht, _ in hands:
-                hand_counts[ht] = hand_counts.get(ht, 0) + 1
-        return {
-            'total_moves': len(self.move_history),
-            'avg_score': sum(self.score_history) / len(self.score_history),
-            'total_score': sum(self.score_history),
-            'best_score': max(self.score_history),
-            'worst_score': min(self.score_history),
-            'hand_counts': hand_counts,
-        }
-
-    def reset(self):
-        self.move_history.clear()
-        self.score_history.clear()
-        self.hand_history.clear()
-        self._cards_colors.clear()
-        self._cards_hypercube.clear()
-        self._move_count_in_hand = 0
-        self._hands_completed = 0
-        self._total_matches = 0
-        self._last_board = None
-        self._last_poker_value = 0
-
-    def analyze_board_opportunities(self, board: np.ndarray) -> dict:
-        """Return a dict counting visible poker-hand opportunities."""
-        hands = self.detector.detect_all(board)
-        counts: dict = {}
-        for ht, _ in hands:
-            counts[ht] = counts.get(ht, 0) + 1
-        return counts

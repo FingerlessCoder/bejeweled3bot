@@ -7,7 +7,6 @@ import cv2
 import numpy as np
 from vision import BoardDetector
 from PIL import ImageGrab
-import win32gui
 
 def show_cell_colors():
     """Show actual BGR values for each cell."""
