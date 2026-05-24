@@ -38,8 +38,11 @@ class BejewelBot:
         if cfg.GAME_MODE == "poker":
             from poker_ai_player import PokerAIPlayer
             self.ai_player = PokerAIPlayer()
+            from vision import SkullDetector
+            self.skull_detector = SkullDetector()
         else:
             self.ai_player = AIPlayer()
+            self.skull_detector = None
         self.logger = BotLogger() if cfg.LOG_MOVES else None
         self.move_count = 0
         self.last_move_time = 0
@@ -380,6 +383,14 @@ class BejewelBot:
                 print(f"[BOT] Board did not change after {self.last_move}; skipping that move")
         self.last_board_signature = board_signature
 
+        # 2a. Poker mode: scan left panel for skull ☠ status
+        #     Updates AI player's skull_status before move selection.
+        if cfg.GAME_MODE == "poker" and self.skull_detector is not None:
+            screenshot = getattr(self.detector, '_last_screenshot', None)
+            if screenshot is not None and hasattr(self.ai_player, 'set_skull_status'):
+                skull_status = self.skull_detector.detect_status(screenshot)
+                self.ai_player.set_skull_status(skull_status)
+
         # 2. AI selects best move(s) and filter
         ranked_moves = self.ai_player.get_ranked_moves(board, top_n=5)
         if not ranked_moves:
@@ -609,7 +620,8 @@ def main():
     print("=" * 60)
 
     mode = (
-        input("Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board, 5=Settings): ")
+        input("Select mode (1=Auto, 2=Step, 3=Test, 4=Calibrate board, "
+              "5=Settings, 6=Calibrate skull panel): ")
         .strip()
         .lower()
     )
@@ -628,6 +640,15 @@ def main():
         detector = BoardDetector()
         WindowManager.setup_window()
         detector.calibrate_board_region()
+        return
+
+    if mode in ("6", "calibrate-panel"):
+        _select_game_mode()
+        from vision import WindowManager, SkullDetector
+
+        detector = SkullDetector()
+        WindowManager.setup_window()
+        detector.calibrate_panel_region()
         return
 
     # Everything else: set game mode then create bot

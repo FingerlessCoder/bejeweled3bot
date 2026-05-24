@@ -148,6 +148,7 @@ class BoardDetector:
         self.last_confidences = np.zeros((BOARD_HEIGHT, BOARD_WIDTH), dtype=float)
         self.special_sample_count = 0
         self.max_special_samples = 200
+        self._last_screenshot: Optional[np.ndarray] = None
 
     def _get_calibration_profile(self, mode_override: str = "") -> str:
         """Map runtime game mode to a calibration profile key.
@@ -1065,6 +1066,7 @@ class BoardDetector:
             8x8 numpy array of gem type IDs, or None if failed
         """
         screenshot = self.capture_screenshot()
+        self._last_screenshot = screenshot
         if screenshot is None:
             return None
 
@@ -1183,3 +1185,350 @@ class BoardDetector:
         cv2.imwrite(filepath, img_debug)
         self.debug_screenshot_count += 1
         print(f"[DEBUG] Screenshot saved: {filepath}")
+
+
+class SkullDetector:
+    """
+    Detects skull ☠ and clover  icons in the left panel of Poker mode.
+
+    The left panel shows 7 hand tiers (flush → pair), each with a small
+    icon indicating whether completing that hand triggers a skull-coin flip.
+
+    How it works:
+      1. **Calibration**: user drag-selects the left-panel region.
+      2. **Detection**: the panel is divided into 7 equal bands (one per tier).
+         In each band the right-most area is scanned for the skull/clover
+         icon using template matching with the user-supplied templates.
+      3. **Result**: a dict like ``{'pair': 'skull', 'three_oak': 'clover', ...}``
+         is returned so the AI can avoid skull-marked hands.
+    """
+
+    # Ordered from highest-value (top) to lowest (bottom) in the panel.
+    TIER_NAMES = (
+        "flush",         # 5 of a kind  — top of panel
+        "four_of_a_kind",
+        "full_house",
+        "three_of_a_kind",
+        "two_pair",
+        "spectrum",
+        "pair",          # — bottom of panel
+    )
+
+    def __init__(self):
+        self.panel_region: Optional[Tuple[int, int, int, int]] = None
+        self._skull_template: Optional[np.ndarray] = None
+        self._clover_template: Optional[np.ndarray] = None
+        self._load_templates()
+
+    # ------------------------------------------------------------------
+    # Template loading
+    # ------------------------------------------------------------------
+
+    def _load_templates(self) -> None:
+        """Load skull/clover PNG templates (RGBA) from the project root."""
+        base = os.path.dirname(os.path.abspath(__file__))
+        skull_path = os.path.join(base, "skull_template.png")
+        clover_path = os.path.join(base, "clover_template.png")
+
+        for name, path, attr in [
+            ("skull", skull_path, "_skull_template"),
+            ("clover", clover_path, "_clover_template"),
+        ]:
+            if not os.path.isfile(path):
+                print(f"[SKULL] WARNING: {name}_template.png not found at {path}")
+                continue
+            img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+            if img is None or img.ndim != 3 or img.shape[2] < 4:
+                print(f"[SKULL] WARNING: {name}_template.png could not be read or has no alpha")
+                continue
+            setattr(self, attr, img)
+
+        if self._skull_template is None or self._clover_template is None:
+            print("[SKULL] Templates missing — skull detection disabled")
+        else:
+            print(f"[SKULL] Loaded templates: skull {self._skull_template.shape}, "
+                  f"clover {self._clover_template.shape}")
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def is_ready(self) -> bool:
+        """True if templates + panel calibration are available."""
+        return (self._skull_template is not None
+                and self._clover_template is not None
+                and self.panel_region is not None)
+
+    def get_panel_region(self, screenshot: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
+        """Extract the saved panel region, or auto-detect it from the screenshot."""
+        # If we have a cached calibrated region from a previous run, use it.
+        panel_calib = self._load_panel_calibration()
+        if panel_calib:
+            client_rect = WindowManager.get_game_window_client_rect()
+            if client_rect is not None:
+                cx, cy, cw, ch = client_rect
+                left = float(panel_calib.get("left", 0))
+                top = float(panel_calib.get("top", 0))
+                right = float(panel_calib.get("right", 0))
+                bottom = float(panel_calib.get("bottom", 0))
+                x = int(cx + left * cw)
+                y = int(cy + top * ch)
+                w = int((right - left) * cw)
+                h = int((bottom - top) * ch)
+                if w > 0 and h > 0:
+                    self.panel_region = (x, y, w, h)
+                    return self.panel_region
+        return None
+
+    def detect_status(self, screenshot: np.ndarray) -> dict:
+        """
+        Scan the calibrated left panel and return skull/clover status for each tier.
+
+        Returns a dict mapping tier name → ``'skull'`` | ``'clover'`` | ``'unknown'``.
+
+        If the panel hasn't been calibrated, returns all ``'unknown'``.
+        """
+        status: dict = {name: "unknown" for name in self.TIER_NAMES}
+
+        if not self.is_ready():
+            region = self.get_panel_region(screenshot)
+            if region is None:
+                return status
+
+        rx, ry, rw, rh = self.panel_region  # type: ignore[misc]
+        if rw <= 0 or rh <= 0:
+            return status
+
+        # Crop the left panel from the full screenshot
+        panel_img = screenshot[ry: ry + rh, rx: rx + rw]
+        if panel_img.size == 0:
+            return status
+
+        panel_gray = cv2.cvtColor(panel_img, cv2.COLOR_BGR2GRAY)
+        n_tiers = len(self.TIER_NAMES)
+        tier_h = rh / n_tiers
+
+        for i, name in enumerate(self.TIER_NAMES):
+            y0 = int(i * tier_h)
+            y1 = int((i + 1) * tier_h)
+            # Icon should be in the right half of each tier band
+            tier_roi = panel_gray[y0:y1, rw // 2: rw]
+            if tier_roi.size < 16:
+                continue
+
+            # Try matching both templates at 1:1 scale on the extracted panel crop.
+            # Since the templates were cropped at the same resolution as the game,
+            # direct matching should find them.
+            skull_val = self._match_in_roi(tier_roi, self._skull_template, scale=1.0)
+            clover_val = self._match_in_roi(tier_roi, self._clover_template, scale=1.0)
+
+            # Also try at 0.5 scale (in case the panel image is downscaled)
+            if skull_val is None or (skull_val < 0.3 and clover_val is not None and clover_val < 0.3):
+                skull_val_s = self._match_in_roi(tier_roi, self._skull_template, scale=0.5)
+                clover_val_s = self._match_in_roi(tier_roi, self._clover_template, scale=0.5)
+                if skull_val is None:
+                    skull_val = skull_val_s
+                elif skull_val_s is not None:
+                    skull_val = max(skull_val, skull_val_s)
+                if clover_val is None:
+                    clover_val = clover_val_s
+                elif clover_val_s is not None:
+                    clover_val = max(clover_val, clover_val_s)
+
+            # Decision
+            THRESH = 0.45
+            if skull_val is not None and skull_val >= THRESH:
+                if clover_val is None or skull_val > clover_val:
+                    status[name] = "skull"
+                    continue
+            if clover_val is not None and clover_val >= THRESH:
+                if skull_val is None or clover_val > skull_val:
+                    status[name] = "clover"
+                    continue
+
+            # Fallback: color-based heuristic
+            status[name] = self._classify_by_color(
+                panel_img[y0:y1, rw // 2: rw]
+            )
+
+        return status
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _match_in_roi(roi: np.ndarray, template: Optional[np.ndarray],
+                      scale: float = 1.0) -> Optional[float]:
+        """Return the best TM_CCOEFF_NORMED match value of *template* in *roi*."""
+        if template is None or roi.size == 0:
+            return None
+        t_gray = cv2.cvtColor(template[:, :, :3], cv2.COLOR_BGR2GRAY)
+        if scale != 1.0:
+            w = max(4, int(t_gray.shape[1] * scale))
+            h = max(4, int(t_gray.shape[0] * scale))
+            t_gray = cv2.resize(t_gray, (w, h))
+        if t_gray.shape[0] > roi.shape[0] or t_gray.shape[1] > roi.shape[1]:
+            return None
+        try:
+            res = cv2.matchTemplate(roi, t_gray, cv2.TM_CCOEFF_NORMED)
+            _, mv, _, _ = cv2.minMaxLoc(res)
+            return float(mv)
+        except cv2.error:
+            return None
+
+    def _classify_by_color(self, roi: np.ndarray) -> str:
+        """HSV-based fallback: skull has dark pixels + red tint, clover is bright + green tint."""
+        if roi.size < 16:
+            return "unknown"
+        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        v = hsv[:, :, 2].astype(np.float32)
+        b = roi[:, :, 0].astype(np.float32)
+        g = roi[:, :, 1].astype(np.float32)
+        r = roi[:, :, 2].astype(np.float32)
+
+        dark_ratio = float((v < 60).mean())
+        bright_ratio = float((v > 200).mean())
+        red_green_ratio = float(r.mean() / max(g.mean(), 1.0))
+
+        # Skull: has dark eye-socket pixels + reddish cast
+        if dark_ratio > 0.15 and red_green_ratio > 1.2:
+            return "skull"
+        # Clover: bright + greenish cast
+        if bright_ratio > 0.25 and red_green_ratio < 1.1:
+            return "clover"
+        # Edge case: mostly dark → likely skull
+        if dark_ratio > 0.40:
+            return "skull"
+        # Edge case: mostly bright → likely clover
+        if bright_ratio > 0.50:
+            return "clover"
+
+        return "unknown"
+
+    # ------------------------------------------------------------------
+    # Calibration
+    # ------------------------------------------------------------------
+
+    def calibrate_panel_region(self) -> bool:
+        """Let user drag-select the LEFT PANEL area (same UI as board calibration)."""
+        print("[SKULL] Calibrating LEFT PANEL region for skull/clover detection")
+        print("[SKULL] Position your Bejeweled 3 window and drag a rectangle around")
+        print("[SKULL] the LEFT PANEL area (showing hand tiers).")
+        print("[SKULL] Press ENTER/S to save, R to reset, ESC/Q to cancel.")
+
+        screenshot = self._capture_calibration_screenshot()
+        if screenshot is None:
+            return False
+
+        client_rect = WindowManager.get_game_window_client_rect()
+        if client_rect is None:
+            print("[ERROR] Could not find game window client area")
+            return False
+        cx, cy, cw, ch = client_rect
+
+        window_name = "Left Panel Calibration"
+        state = {"dragging": False, "start": None, "end": None, "selection": None}
+
+        def _redraw() -> np.ndarray:
+            canvas = screenshot.copy()
+            if state["start"] and state["end"]:
+                cv2.rectangle(canvas, state["start"], state["end"], (0, 255, 0), 2)
+            cv2.putText(canvas, "Drag around LEFT PANEL, then S/ENTER to save",
+                        (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(canvas, "R reset | ESC/Q cancel",
+                        (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            return canvas
+
+        def _mouse(event, x, y, _flags, _param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                state["dragging"] = True
+                state["start"] = (x, y)
+                state["end"] = (x, y)
+            elif event == cv2.EVENT_MOUSEMOVE and state["dragging"]:
+                state["end"] = (x, y)
+            elif event == cv2.EVENT_LBUTTONUP:
+                state["dragging"] = False
+                state["end"] = (x, y)
+                x1 = min(state["start"][0], state["end"][0])
+                y1 = min(state["start"][1], state["end"][1])
+                x2 = max(state["start"][0], state["end"][0])
+                y2 = max(state["start"][1], state["end"][1])
+                state["selection"] = (x1, y1, x2, y2)
+
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback(window_name, _mouse)
+
+        try:
+            while True:
+                cv2.imshow(window_name, _redraw())
+                key = cv2.waitKey(20) & 0xFF
+                if key in (13, ord("s")) and state["selection"] is not None:
+                    x1, y1, x2, y2 = state["selection"]
+                    left = max(0.0, min(1.0, (x1 - cx) / cw))
+                    top = max(0.0, min(1.0, (y1 - cy) / ch))
+                    right = max(0.0, min(1.0, (x2 - cx) / cw))
+                    bottom = max(0.0, min(1.0, (y2 - cy) / ch))
+                    if right <= left or bottom <= top:
+                        print("[SKULL] Invalid selection. Try a larger rectangle.")
+                        continue
+                    norm_region = {"left": left, "top": top, "right": right, "bottom": bottom}
+                    if self._save_panel_calibration(norm_region):
+                        # Store absolute region for immediate use
+                        x = int(cx + left * cw)
+                        y = int(cy + top * ch)
+                        w = int((right - left) * cw)
+                        h = int((bottom - top) * ch)
+                        self.panel_region = (x, y, w, h)
+                        print(f"[SKULL] Panel region saved: ({x},{y}) {w}x{h}")
+                        return True
+                elif key in (ord("r"),):
+                    state["start"] = state["end"] = state["selection"] = None
+                elif key in (27, ord("q")):
+                    return False
+        finally:
+            cv2.destroyWindow(window_name)
+
+    def _capture_calibration_screenshot(self) -> Optional[np.ndarray]:
+        """Capture full screenshot for calibration UI."""
+        try:
+            from PIL import ImageGrab
+            pil = ImageGrab.grab()
+            return cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
+        except Exception as e:
+            print(f"[SKULL] Screenshot capture failed: {e}")
+            return None
+
+    # ------------------------------------------------------------------
+    # Persistence (panel calibration)
+    # ------------------------------------------------------------------
+
+    _PANEL_CALIB_FILE = "panel_calibration.json"
+
+    def _save_panel_calibration(self, norm_region: dict) -> bool:
+        """Save normalised panel region to disk."""
+        import json
+        payload = {
+            "version": 1,
+            "normalized_panel_region": norm_region,
+            "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        try:
+            with open(self._PANEL_CALIB_FILE, "w", encoding="utf-8") as f:
+                json.dump(payload, f, indent=2)
+            return True
+        except Exception as e:
+            print(f"[SKULL] Failed to save panel calibration: {e}")
+            return False
+
+    def _load_panel_calibration(self) -> Optional[dict]:
+        """Load saved normalised panel region."""
+        import json
+        if not os.path.isfile(self._PANEL_CALIB_FILE):
+            return None
+        try:
+            with open(self._PANEL_CALIB_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data.get("normalized_panel_region")
+        except Exception:
+            return None

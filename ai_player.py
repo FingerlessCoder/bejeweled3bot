@@ -50,6 +50,10 @@ class AIPlayer:
         """No-op base — only PokerAIPlayer implements hand tracking."""
         pass
 
+    def set_skull_status(self, status: dict) -> None:
+        """No-op base — only PokerAIPlayer implements skull penalty."""
+        pass
+
     def select_best_move(self, board: np.ndarray) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
         """
         Analyze board and return the best move.

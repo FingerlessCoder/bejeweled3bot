@@ -31,6 +31,11 @@ class PokerAIPlayer:
     POKER_BONUS_WEIGHT = 4.0        # how much to favour poker hand value (greedy)
     TARGET_MULTIPLIER = 3.0         # extra multiplier when a move REACHES/EXCEEDS the target hand
 
+    # Skull penalty: when a hand tier has a skull ☠ completing it triggers a
+    # dangerous coin flip.  This penalty discourages moves that would improve
+    # the current hand toward a skull-marked tier.
+    SKULL_PENALTY = -5000
+
     # Hand-improvement scoring weights (primary signal in poker mode)
     HAND_IMPROVEMENT_WEIGHT = 10.0  # amplify hand-type upgrade (pair→three_oak = +7500*10)
     CASCADE_WEIGHT = 0.001          # cascade score is a tiebreaker only
@@ -62,6 +67,10 @@ class PokerAIPlayer:
         self._move_count_in_hand: int = 0       # 0..5, resets after hand evaluation
         self._hands_completed: int = 0
         self._total_matches: int = 0
+
+        # Skull ☠ status from the left panel — maps tier name → 'skull' | 'clover' | 'unknown'
+        # Set externally via set_skull_status() after SkullDetector scans the panel.
+        self.skull_status: dict = {}
 
     # ------------------------------------------------------------------
     # Public API  (matches AIPlayer interface)
@@ -141,6 +150,27 @@ class PokerAIPlayer:
         new_score = self.detector.score_hand(new_type)
         return new_score - current_score
 
+    def set_skull_status(self, status: dict) -> None:
+        """
+        Set the skull/clover status for each hand tier from the left panel.
+        Called by the bot controller after SkullDetector.detect_status().
+        Expected keys: same as TIER_NAMES (flush, four_of_a_kind, ... pair).
+        """
+        self.skull_status = status if status else {}
+
+    def _skull_penalty(self, matched_color: Optional[int]) -> int:
+        """
+        Return SKULL_PENALTY if adding *matched_color* would put the hand
+        into a skull-marked tier, else 0.
+        """
+        if matched_color is None or not self.skull_status:
+            return 0
+        new_cards = self._cards_colors + [matched_color]
+        new_type = self._classify_hand(new_cards)
+        if self.skull_status.get(new_type) == "skull":
+            return self.SKULL_PENALTY
+        return 0
+
     def get_ranked_moves(self, board: np.ndarray, top_n: int = 10) -> list:
         """
         Rank all valid moves by:
@@ -202,14 +232,19 @@ class PokerAIPlayer:
             matched_color, _ = self._simulate_matched_color(board, move)
             hand_improvement = self._hand_improvement_score(matched_color)
 
-            # ---------- g. Total (hand improvement dominates) ----------
+            # ---------- g. Skull penalty (penalise moves toward skull-marked tiers) ---
+            skull_penalty = self._skull_penalty(matched_color)
+
+            # ---------- h. Total (hand improvement dominates) ----------
             # Hand improvement is the primary signal (×10).
             # Cascade score is a tiebreaker (×0.001).
             # Board-level poker potential is a minor tiebreaker (×0.05).
+            # Skull penalty (−5000) discourages advancing toward a skull-marked hand.
             total = (hand_improvement * self.HAND_IMPROVEMENT_WEIGHT
                      + score * self.CASCADE_WEIGHT
                      + int(followup * self.LOOKAHEAD_DISCOUNT)
-                     + poker_score * 0.05)
+                     + poker_score * 0.05
+                     + skull_penalty)
             move_scores.append((move, total))
 
         move_scores.sort(key=lambda x: x[1], reverse=True)
